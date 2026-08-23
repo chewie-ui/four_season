@@ -18,13 +18,39 @@ import env from '../config/env.js';
 import { buildPrompt } from '../config/scenes.js';
 
 let client = null;
+
+/**
+ * Deux routes vers les memes modeles :
+ *
+ *   'api'    L'API Gemini grand public (cle AIza...). Simple, mais
+ *            RESTREINTE GEOGRAPHIQUEMENT : une IP de datacenter dans une
+ *            zone non desservie recoit « User location is not supported ».
+ *
+ *   'vertex' Vertex AI (Google Cloud). Memes modeles, endpoints regionaux
+ *            explicites, pas de restriction sur l'IP appelante. C'est la
+ *            route prevue pour la production, et la seule qui fonctionne
+ *            depuis un serveur dont l'IP deplait a Google.
+ */
 function getClient() {
+  if (client) return client;
+
+  if (env.gemini.backend === 'vertex') {
+    if (!env.gemini.project) return null;
+    client = new GoogleGenAI({
+      vertexai: true,
+      project: env.gemini.project,
+      location: env.gemini.location,
+    });
+    return client;
+  }
+
   if (!env.gemini.configured) return null;
-  if (!client) client = new GoogleGenAI({ apiKey: env.gemini.apiKey });
+  client = new GoogleGenAI({ apiKey: env.gemini.apiKey });
   return client;
 }
 
-export const isConfigured = () => env.gemini.configured;
+export const isConfigured = () =>
+  env.gemini.backend === 'vertex' ? Boolean(env.gemini.project) : env.gemini.configured;
 
 /** Coût observé par image, en millionièmes d'euro. À recaler avec la facture réelle. */
 export const COST_MICRO_EUR = {
@@ -64,7 +90,14 @@ export class GeminiError extends Error {
  */
 export async function generateVariant(imageBuffer, mimeType, sceneId, opts = {}) {
   const ai = getClient();
-  if (!ai) throw new GeminiError('Clé GEMINI_API_KEY absente du .env', { status: 503 });
+  if (!ai) {
+    throw new GeminiError(
+      env.gemini.backend === 'vertex'
+        ? 'GOOGLE_CLOUD_PROJECT absent du .env (mode Vertex AI).'
+        : 'Clé GEMINI_API_KEY absente du .env',
+      { status: 503, rejouable: false }
+    );
+  }
 
   const model = opts.model || env.gemini.model;
   const prompt = opts.promptComplet || buildPrompt(sceneId, opts.extra || '');
@@ -127,6 +160,20 @@ function traduireErreur(err) {
 
   if (/API key|API_KEY_INVALID/i.test(msg) || /\b401\b/.test(msg)) {
     return new GeminiError('Clé API Gemini invalide.', { status: 401, rejouable: false, cause: err });
+  }
+
+  // Restriction géographique : Google refuse l'IP appelante, pas la clé.
+  // Fréquent depuis un datacenter — l'API Gemini grand public n'est pas
+  // servie partout, alors que Vertex AI l'est.
+  if (/location is not supported|FAILED_PRECONDITION/i.test(msg)) {
+    return new GeminiError(
+      'Google refuse l’adresse IP de ce serveur : l’API Gemini n’est pas disponible ' +
+        'depuis sa zone géographique. Ce n’est pas un problème de clé. ' +
+        'Basculez sur Vertex AI (GEMINI_BACKEND=vertex) — mêmes modèles, ' +
+        'endpoints régionaux, aucune restriction sur l’IP appelante. ' +
+        'Voir docs/DEPLOIEMENT.md.',
+      { status: 451, rejouable: false, cause: err }
+    );
   }
 
   if (/quota|RESOURCE_EXHAUSTED/i.test(msg) || /\b429\b/.test(msg)) {

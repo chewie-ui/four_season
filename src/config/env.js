@@ -22,8 +22,16 @@ export const env = {
   },
 
   gemini: {
+    // 'api'    → API Gemini grand public, clé AIza… Simple, mais restreinte
+    //            géographiquement : une IP de datacenter peut être refusée
+    //            (« User location is not supported »).
+    // 'vertex' → Vertex AI. Mêmes modèles, endpoints régionaux, aucune
+    //            restriction sur l'IP appelante. La route de production.
+    backend: (process.env.GEMINI_BACKEND || 'api').toLowerCase(),
     apiKey: process.env.GEMINI_API_KEY || '',
     model: process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image',
+    project: process.env.GOOGLE_CLOUD_PROJECT || '',
+    location: process.env.GOOGLE_CLOUD_LOCATION || 'global',
     get configured() {
       return Boolean(this.apiKey);
     },
