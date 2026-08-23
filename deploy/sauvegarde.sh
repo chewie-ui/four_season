@@ -28,11 +28,16 @@ set -a; source <(grep -E '^(DB_USER|DB_PASSWORD|DB_NAME|DB_HOST|DB_PORT|STORAGE_
 mkdir -p "$DEST"
 
 # ---- base de données -------------------------------------------------------
-# --single-transaction : dump cohérent sans verrouiller les écritures.
 echo "[$(date +%T)] dump de ${DB_NAME}…"
+# --no-tablespaces : sans lui, mysqldump 8 tente de lire les tablespaces et
+#   exige le privilege PROCESS, qui est global au serveur. Notre utilisateur
+#   est volontairement limite a sa seule base — on ne va pas elargir ses
+#   droits pour faire taire un avertissement.
+# --single-transaction : dump coherent sans verrouiller les ecritures.
 MYSQL_PWD="$DB_PASSWORD" mysqldump \
   --host="${DB_HOST:-127.0.0.1}" --port="${DB_PORT:-3306}" --user="$DB_USER" \
   --single-transaction --quick --routines --triggers --events \
+  --no-tablespaces \
   --default-character-set=utf8mb4 \
   "$DB_NAME" | gzip -9 > "$DEST/base-$JOUR.sql.gz"
 
