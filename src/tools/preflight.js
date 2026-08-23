@@ -140,7 +140,56 @@ if (!env.db.configured) {
 
 /* -------------------------------------------------------------- Gemini --- */
 
-if (!env.gemini.configured) {
+// Deux backends possibles : on contrôle celui qui est réellement utilisé.
+// Contrôler la clé AI Studio alors que le serveur est passé sur Vertex
+// produit un échec qui n'a aucun rapport avec l'état réel du service.
+if (env.gemini.backend === 'vertex') {
+  ajouter(AVERTIR, 'accès Gemini via Vertex AI', true, `projet ${env.gemini.project || '—'}, région ${env.gemini.location}`);
+
+  ajouter(BLOQUANT, 'GOOGLE_CLOUD_PROJECT renseigné', Boolean(env.gemini.project), '');
+
+  const chemin = process.env.GOOGLE_APPLICATION_CREDENTIALS || '';
+  let compte = null;
+  try {
+    const brut = JSON.parse(await readFile(chemin, 'utf8'));
+    compte = brut.client_email;
+    ajouter(
+      BLOQUANT,
+      'fichier de compte de service lisible',
+      true,
+      `${compte} (projet ${brut.project_id})`
+    );
+    ajouter(
+      BLOQUANT,
+      'le compte de service appartient au bon projet',
+      brut.project_id === env.gemini.project,
+      brut.project_id === env.gemini.project
+        ? ''
+        : `la clé est du projet « ${brut.project_id} », GOOGLE_CLOUD_PROJECT dit « ${env.gemini.project} »`
+    );
+  } catch (err) {
+    ajouter(
+      BLOQUANT,
+      'fichier de compte de service lisible',
+      false,
+      chemin ? `${chemin} — ${err.code || err.message}` : 'GOOGLE_APPLICATION_CREDENTIALS non défini'
+    );
+  }
+
+  // Demande d'un jeton d'accès : gratuit, et c'est la seule preuve que le
+  // compte de service est réellement accepté par Google.
+  if (compte) {
+    try {
+      const { GoogleAuth } = await import('google-auth-library');
+      const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
+      const client = await auth.getClient();
+      const jeton = await client.getAccessToken();
+      ajouter(BLOQUANT, 'authentification Google acceptée', Boolean(jeton?.token), '');
+    } catch (err) {
+      ajouter(BLOQUANT, 'authentification Google acceptée', false, String(err.message).slice(0, 160));
+    }
+  }
+} else if (!env.gemini.configured) {
   ajouter(BLOQUANT, 'clé Gemini présente', false, 'GEMINI_API_KEY manquante');
 } else {
   ajouter(BLOQUANT, 'clé Gemini présente', true, '');
@@ -150,7 +199,16 @@ if (!env.gemini.configured) {
         encodeURIComponent(env.gemini.apiKey)
     );
     if (!rep.ok) {
-      ajouter(BLOQUANT, 'clé Gemini acceptée', false, `HTTP ${rep.status}`);
+      const detail = await rep.text().catch(() => '');
+      const geo = /location is not supported/i.test(detail);
+      ajouter(
+        BLOQUANT,
+        'clé Gemini acceptée',
+        false,
+        geo
+          ? 'Google refuse l’IP de ce serveur. Basculez sur Vertex AI — voir docs/GEMINI-IP-REFUSEE.md'
+          : `HTTP ${rep.status} — ${detail.slice(0, 160)}`
+      );
     } else {
       const { models = [] } = await rep.json();
       const noms = models.map((m) => m.name.replace(/^models\//, ''));
