@@ -319,52 +319,8 @@ client payant.
 
 ---
 
-## Gemini refuse l IP du serveur
+## Gemini refuse l'IP du serveur
 
-Symptome, dans les logs du worker ou sur /demo :
-
-
-
-**Ce n est pas la cle.** L API Gemini grand public est restreinte
-geographiquement : Google refuse certaines plages d IP de datacenter, meme
-quand la meme cle fonctionne parfaitement depuis un poste de travail.
-
-### Verifier
-
-
-
-Si le pays affiche n est pas celui attendu, ou si l IP est marquee comme
-hebergement, c est l explication.
-
-### La solution : Vertex AI
-
-Memes modeles, memes prompts, endpoints regionaux explicites, **aucune
-restriction sur l IP appelante**. C est la route prevue par Google pour la
-production ; l API grand public vise le prototypage.
-
-1. Dans Google Cloud, sur le projet deja associe a la cle :
-   activer l API **Vertex AI** et creer un **compte de service** avec le role
-   , puis telecharger sa cle JSON.
-
-2. Deposer le JSON sur le serveur, hors du depot :
-
-
-
-3. Dans le  :
-
-
-
-4. Redemarrer et tester :
-
-
-
-> La facturation doit etre active sur le projet, comme pour l API grand public.
-> Verifiez aussi que le modele choisi est disponible dans la region retenue :
->  couvre le plus large, une region europeenne peut ne pas tout servir.
-
-### Solution de repli
-
-Si Vertex AI pose probleme, l autre voie est de deplacer l application vers
-un datacenter dont l IP est acceptee. C est plus lourd et moins fiable :
-la liste des zones desservies change sans preavis, alors que Vertex AI est
-un engagement contractuel.
+Si la génération échoue avec « User location is not supported for the API use »,
+ce n'est pas la clé mais l'adresse IP du serveur. La procédure complète de
+bascule vers Vertex AI est dans [GEMINI-IP-REFUSEE.md](GEMINI-IP-REFUSEE.md).
