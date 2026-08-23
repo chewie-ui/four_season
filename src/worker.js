@@ -9,6 +9,8 @@
  * la réservation utilise SELECT ... FOR UPDATE SKIP LOCKED.
  */
 import { randomUUID } from 'node:crypto';
+import { realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 import env from './config/env.js';
 import { query, transaction } from './db/pool.js';
@@ -222,8 +224,30 @@ export function arreterWorker() {
   tourne = false;
 }
 
-// Exécution directe : `node src/worker.js`
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {
+/**
+ * Ce fichier est-il le point d'entrée du processus ?
+ *
+ * `process.argv[1]` ne suffit pas : lancé par pm2 en mode cluster, il pointe
+ * sur le conteneur de pm2, pas sur ce script. La détection échouait alors en
+ * silence — le processus démarrait, n'appelait jamais demarrerWorker(), et
+ * pm2 l'affichait « online » pendant que la file s'accumulait sans personne
+ * pour la consommer. C'est le pire type de panne : invisible.
+ *
+ * pm2 renseigne `pm_exec_path` avec le vrai chemin dans les deux modes.
+ */
+function estPointDEntree() {
+  const moi = fileURLToPath(import.meta.url);
+  const candidats = [process.env.pm_exec_path, process.argv[1]].filter(Boolean);
+  return candidats.some((c) => {
+    try {
+      return realpathSync(c) === realpathSync(moi);
+    } catch {
+      return false;
+    }
+  });
+}
+
+if (estPointDEntree()) {
   demarrerWorker();
   const stop = () => {
     console.log('\n[worker] arrêt demandé…');

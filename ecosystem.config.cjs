@@ -15,6 +15,9 @@ module.exports = {
       script: 'server.js',
       env: { NODE_ENV: 'production', WORKER_INLINE: 'false' },
       instances: 1,
+      // fork explicite : en cluster, pm2 masque le chemin du script et la
+      // detection du point d'entree echoue. Le cluster n'apporte rien ici.
+      exec_mode: 'fork',
       max_memory_restart: '512M',
       autorestart: true,
       // Un redemarrage en boucle signale un probleme de configuration :
@@ -30,6 +33,7 @@ module.exports = {
       script: 'src/worker.js',
       env: { NODE_ENV: 'production' },
       instances: 1,
+      exec_mode: 'fork',
       // sharp + libvips consomment de la memoire par image traitee
       max_memory_restart: '1G',
       autorestart: true,
