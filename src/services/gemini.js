@@ -195,17 +195,26 @@ function traduireErreur(err) {
 
   if (/not found|NOT_FOUND/i.test(msg) || /\b404\b/.test(msg)) {
     const conseil = /no longer available/i.test(msg)
-      ? ' Ce modèle a été retiré : prenez celui indiqué dans le message ci-dessus.'
-      : '';
+      ? ' Ce modèle a été retiré : prenez celui indiqué par Google ci-dessous.'
+      : env.gemini.backend === 'vertex'
+        ? ` Sur Vertex AI, le modèle doit exister dans la région « ${env.gemini.location} » — essayez « global ».`
+        : '';
     return new GeminiError(
-      `Modèle « ${env.gemini.model} » introuvable ou inaccessible.${conseil} ` +
-        'Corrigez GEMINI_IMAGE_MODEL dans .env — la liste réelle est donnée par `npm run gemini:models`.',
+      `Modèle « ${env.gemini.model} » introuvable ou inaccessible.${conseil}` +
+        `\n\nRéponse de Google : ${msg.slice(0, 400)}`,
       { status: 404, rejouable: false, cause: err }
     );
   }
 
   if (/permission|PERMISSION_DENIED/i.test(msg) || /\b403\b/.test(msg)) {
-    return new GeminiError('Clé refusée pour ce modèle (permission). Vérifiez le projet Google Cloud.', {
+    const piste =
+      env.gemini.backend === 'vertex'
+        ? 'Vérifiez que le compte de service porte bien le rôle « Utilisateur Agent Platform » ' +
+          '(roles/aiplatform.user) sur le projet, et que l’API Vertex AI y est activée.'
+        : 'Vérifiez le projet Google Cloud associé à la clé.';
+    // On conserve le message d'origine : c'est lui qui nomme la permission
+    // manquante. L'écraser par un texte générique rend le diagnostic impossible.
+    return new GeminiError(`Accès refusé. ${piste}\n\nRéponse de Google : ${msg.slice(0, 400)}`, {
       status: 403,
       rejouable: false,
       cause: err,
