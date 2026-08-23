@@ -283,3 +283,4 @@ Avant toute mise en ligne :
 - compléter `/mentions-legales` et `/confidentialite` (champs entre crochets) ;
 - **retirer `ALLOW_PRIVATE_IMAGE_HOSTS` du `.env` de production** — c'est un
   contournement délibéré du garde-fou SSRF, réservé au développement local.
+# four_season
