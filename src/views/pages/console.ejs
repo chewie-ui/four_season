@@ -1,0 +1,190 @@
+<%- include('../partials/head') %>
+<link rel="stylesheet" href="/css/console.css">
+
+<header class="c-entete">
+  <a class="c-marque" href="/console">
+    <img src="/img/logo.svg" alt="" width="28" height="28">
+    <%= brand.name %> <span>console</span>
+  </a>
+  <div class="c-entete-droite">
+    <span class="c-credits" data-credits><%= credits %> crédits</span>
+    <form method="post" action="/console/deconnexion" style="display:inline">
+      <button class="btn btn-vide" type="submit" style="padding:.5em 1em;font-size:.85rem">Quitter</button>
+    </form>
+  </div>
+</header>
+
+<main id="principal" class="c-corps">
+
+  <!-- =============================================== ÉTAPE 1 : LA PHOTO -->
+  <section class="c-panneau" data-etape="1">
+    <div class="c-panneau-titre">
+      <span class="c-num">1</span>
+      <h2>La photo du bien</h2>
+    </div>
+
+    <div class="c-depot" data-depot>
+      <input type="file" id="photo" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="c-depot-vide" data-depot-vide>
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor"
+             stroke-width="1.4" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/>
+        </svg>
+        <p><b>Glissez une photo</b> ou <button type="button" class="c-lien" data-parcourir>parcourez</button></p>
+        <small>JPEG, PNG ou WebP — 12 Mo maximum. Extérieur, façade ou vue drone.</small>
+      </div>
+      <img data-depot-apercu hidden alt="">
+      <button type="button" class="c-changer" data-changer hidden>Changer de photo</button>
+    </div>
+
+    <div class="c-champs">
+      <div class="champ">
+        <label for="titre">Nom du bien <span class="opt">— pour vous y retrouver</span></label>
+        <input id="titre" type="text" maxlength="120" placeholder="Villa Les Glycines">
+      </div>
+      <div class="champ">
+        <label for="ville">Ville <span class="opt">— facultatif</span></label>
+        <input id="ville" type="text" maxlength="80" placeholder="Annecy-le-Vieux">
+      </div>
+      <div class="champ">
+        <label for="reference">Référence <span class="opt">— celle de votre logiciel</span></label>
+        <input id="reference" type="text" maxlength="60" placeholder="ANNONCE-2417">
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================== ÉTAPE 2 : LES AMBIANCES -->
+  <section class="c-panneau" data-etape="2">
+    <div class="c-panneau-titre">
+      <span class="c-num">2</span>
+      <h2>Les ambiances à générer</h2>
+      <div class="c-prereglages">
+        <button type="button" class="c-puce" data-preset="vendeur">Le trio vendeur</button>
+        <button type="button" class="c-puce" data-preset="saisons">Les 4 saisons</button>
+        <button type="button" class="c-puce" data-preset="tout">Tout cocher</button>
+        <button type="button" class="c-puce" data-preset="rien">Décocher</button>
+      </div>
+    </div>
+
+    <% groups.forEach(function (g) { %>
+      <div class="c-groupe">
+        <div class="c-groupe-titre">
+          <label class="c-tout">
+            <input type="checkbox" data-groupe-tout="<%= g.id %>">
+            <span><%= g.label %></span>
+          </label>
+          <small><%= g.hint %></small>
+        </div>
+        <div class="c-cases">
+          <% scenesByGroup(g.id).forEach(function (sc) { %>
+            <label class="c-case" title="<%= sc.description %>">
+              <input type="checkbox" name="scene" value="<%= sc.id %>" data-groupe="<%= g.id %>">
+              <i style="background:linear-gradient(150deg, <%= sc.visual.skyTop %>, <%= sc.visual.skyBottom %> 55%, <%= sc.visual.ground %>)"></i>
+              <span>
+                <b><%= sc.label %></b>
+                <small><%= sc.short %></small>
+              </span>
+            </label>
+          <% }); %>
+        </div>
+      </div>
+    <% }); %>
+
+    <div class="c-groupe">
+      <div class="c-groupe-titre">
+        <label class="c-tout" style="cursor:default">
+          <input type="checkbox" data-libre-actif>
+          <span>Demande libre</span>
+        </label>
+        <small>Une ambiance décrite avec vos mots</small>
+      </div>
+      <input type="text" data-libre maxlength="200" disabled
+             placeholder="ex. : une nuit noire, sans lune, seules les fenêtres éclairées">
+      <p class="c-aide">
+        Compte pour un crédit. La demande est encadrée : l’architecture reste verrouillée
+        même si le texte demande autre chose.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================ ÉTAPE 3 : LA GÉNÉRATION -->
+  <section class="c-panneau" data-etape="3">
+    <div class="c-panneau-titre">
+      <span class="c-num">3</span>
+      <h2>Génération</h2>
+    </div>
+
+    <div class="c-lancer">
+      <button class="btn btn-or btn-lg" data-generer disabled>
+        Générer <span data-compte>0</span> ambiance<span data-pluriel></span>
+      </button>
+      <p class="c-cout doux">
+        <span data-cout>0,00 €</span> · environ <span data-duree>15 s</span>
+        <br><small>Les ambiances déjà calculées sont regénérées gratuitement.</small>
+      </p>
+    </div>
+
+    <div class="c-message" data-message role="status" aria-live="polite"></div>
+
+    <div class="c-galerie" data-galerie hidden>
+      <div class="c-galerie-barre">
+        <span data-avancement>—</span>
+        <div class="c-galerie-actions">
+          <a class="btn btn-vide" data-zip hidden download>Tout télécharger (ZIP)</a>
+          <button type="button" class="btn btn-vide" data-code hidden>Code d’intégration</button>
+        </div>
+      </div>
+      <div class="c-grille" data-grille></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= BIENS RÉCENTS -->
+  <% if (biens.length) { %>
+    <section class="c-panneau">
+      <div class="c-panneau-titre"><h2>Biens récents</h2></div>
+      <div class="c-recents">
+        <% biens.forEach(function (b) { %>
+          <a class="c-recent" href="/console?bien=<%= b.publicId %>">
+            <% if (b.apercu) { %><img src="<%= b.apercu %>" alt="" loading="lazy"><% } else { %><div class="c-recent-vide"></div><% } %>
+            <span>
+              <b><%= b.titre || 'Sans nom' %></b>
+              <small><%= b.ambiances %> ambiance<%= b.ambiances > 1 ? 's' : '' %><%= b.ville ? ' · ' + b.ville : '' %></small>
+            </span>
+          </a>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+</main>
+
+<!-- vue plein écran -->
+<div class="c-loupe" data-loupe hidden>
+  <button type="button" class="c-loupe-fermer" data-loupe-fermer aria-label="Fermer">&times;</button>
+  <figure>
+    <img data-loupe-img alt="">
+    <figcaption data-loupe-legende></figcaption>
+  </figure>
+  <div class="c-loupe-barre">
+    <button type="button" class="btn btn-vide" data-loupe-avant>Voir l’originale</button>
+    <a class="btn btn-or" data-loupe-dl download>Télécharger</a>
+  </div>
+</div>
+
+<!-- code d'intégration -->
+<div class="c-loupe" data-modale-code hidden>
+  <button type="button" class="c-loupe-fermer" data-code-fermer aria-label="Fermer">&times;</button>
+  <div class="c-code-boite">
+    <h3>Coller sur la page de l’annonce</h3>
+    <p class="doux" style="font-size:.9rem">
+      Les ambiances sont déjà calculées : le visiteur n’attend jamais,
+      et aucun appel n’est fait à nos serveurs.
+    </p>
+    <pre class="pre-code"><code data-code-html></code></pre>
+    <button type="button" class="btn btn-or" data-copier>Copier</button>
+  </div>
+</div>
+
+<script src="/js/console.js" defer></script>
+</body>
+</html>

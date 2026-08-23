@@ -1,0 +1,42 @@
+<%- include('../partials/head') %>
+
+<main id="principal" style="min-height:100vh;display:grid;place-items:center;padding:2rem">
+  <div style="width:100%;max-width:26rem">
+    <a href="/" style="display:inline-flex;align-items:center;gap:.7rem;text-decoration:none;
+                       font-family:var(--serif);font-size:1.5rem;margin-bottom:2.5rem">
+      <img src="/img/logo.svg" alt="" width="34" height="34">
+      <%= brand.name %>
+    </a>
+
+    <h1 style="font-size:2rem;margin-bottom:.4em">Console agence</h1>
+    <p class="doux" style="font-size:.95rem;margin-bottom:2rem">
+      Connectez-vous avec la clé secrète de votre agence.
+      Elle est vérifiée ici et n’est jamais transmise à votre navigateur.
+    </p>
+
+    <% if (erreur) { %>
+      <div class="avis" role="alert" style="border-color:#D9534F;background:rgba(217,83,79,.09)">
+        <%= erreur %>
+      </div>
+    <% } %>
+
+    <form method="post" action="/console/connexion">
+      <div class="champ">
+        <label for="cle">Clé secrète</label>
+        <input id="cle" name="cle" type="password" required autocomplete="off"
+               placeholder="sk_live_…" style="font-family:var(--mono);font-size:.9rem">
+      </div>
+      <button class="btn btn-or btn-lg" type="submit" style="width:100%">
+        Ouvrir la console <span class="fleche">→</span>
+      </button>
+    </form>
+
+    <p class="doux" style="font-size:.84rem;margin-top:1.6rem">
+      Pas encore de clé ? Elle est affichée une seule fois par
+      <code>npm run db:seed</code>, ou fournie par nous à l’ouverture du compte.
+    </p>
+  </div>
+</main>
+
+</body>
+</html>

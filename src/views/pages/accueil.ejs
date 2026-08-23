@@ -1,0 +1,241 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="principal">
+
+  <!-- ============================================================ HÉRO -->
+  <section class="hero">
+    <div class="enveloppe hero-grille">
+      <div>
+        <p class="etiquette">Photo unique, mille moments</p>
+        <h1>
+          <span class="ligne">La même maison.</span>
+          <span class="ligne italique">Toutes ses lumières.</span>
+        </h1>
+        <p class="chapo">
+          Votre agent publie une photo. <%= brand.name %> en régénère automatiquement
+          <%= totalScenes %> versions — hiver, coucher de soleil, jour de pluie, heure bleue —
+          sans jamais toucher à l’architecture du bien.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-or btn-lg" href="/demo">Tester sur ma photo <span class="fleche">→</span></a>
+          <a class="btn btn-vide btn-lg" href="/integration">Voir l’intégration</a>
+        </div>
+        <p class="hero-note">Deux lignes de code. Aucun plugin. Compatible avec tous les sites.</p>
+      </div>
+
+      <div class="visionneuse" data-visionneuse>
+        <div class="vis-barre">
+          <span class="vis-pastilles" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>villa-les-glycines-01.jpg</span>
+        </div>
+
+        <div class="scene-stage" data-stage>
+          <%- include('../partials/scene', { sid: 'hero' }) %>
+          <div class="vis-etiquette">
+            <b data-etiquette-titre>Plein jour</b>
+            <span data-etiquette-detail>13 h</span>
+          </div>
+        </div>
+
+        <div class="vis-choix" role="group" aria-label="Choisir une ambiance">
+          <% demoScenes.forEach(function (sc, i) { %>
+            <button type="button"
+                    data-scene="<%= sc.id %>"
+                    data-vars='<%= JSON.stringify(sc.visual) %>'
+                    data-label="<%= sc.label %>"
+                    data-short="<%= sc.short %>"
+                    aria-pressed="<%= i === 0 ? 'true' : 'false' %>">
+              <%= sc.label %><small><%= sc.short %></small>
+            </button>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= BANDEAU -->
+  <div class="bandeau" aria-hidden="true">
+    <div class="bandeau-piste">
+      <% for (let r = 0; r < 2; r++) { %>
+        <span>Printemps</span><span>Été</span><span>Automne</span><span>Hiver</span>
+        <span>Aube</span><span>Plein jour</span><span>Coucher de soleil</span><span>Heure bleue</span>
+        <span>Nuit</span><span>Ciel couvert</span><span>Pluie</span><span>Brouillard</span><span>Neige</span>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ======================================================= LE PROBLÈME -->
+  <section class="section">
+    <div class="enveloppe duo">
+      <div class="reveler">
+        <p class="etiquette">Le problème</p>
+        <div class="citation">
+          <blockquote>
+            « Je reviendrai le voir en fin de journée, pour juger de la lumière. »
+          </blockquote>
+          <cite>Ce que dit l’acheteur. <b>Il ne revient pas.</b></cite>
+        </div>
+      </div>
+
+      <div class="reveler">
+        <p>
+          Une annonce immobilière est presque toujours photographiée <b>une seule fois</b> :
+          un mardi de mars, à 11 h, sous un ciel gris. L’acheteur, lui, doit se projeter
+          sur trente ans — un dimanche de juillet dans le jardin, un soir de décembre
+          quand la nuit tombe à 17 h.
+        </p>
+        <p>
+          Cet écart, personne ne le comble. Alors on repousse : « je repasserai à telle heure »,
+          « je reviendrai voir en hiver ». Chaque report est une visite perdue,
+          et souvent un acheteur perdu.
+        </p>
+        <div class="chiffres mt-3">
+          <div class="chiffre">
+            <b><%= totalScenes %></b>
+            <span>ambiances générées depuis une seule photo</span>
+          </div>
+          <div class="chiffre">
+            <b>~20 s</b>
+            <span>pour produire un rendu, en tâche de fond</span>
+          </div>
+          <div class="chiffre">
+            <b>0</b>
+            <span>déplacement supplémentaire pour l’agent</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================== COMMENT ÇA MARCHE -->
+  <section class="section">
+    <div class="enveloppe">
+      <p class="etiquette">Comment ça marche</p>
+      <h2 style="max-width:20ch">Trois étapes, dont deux invisibles.</h2>
+
+      <div class="grille mt-3">
+        <article class="carte reveler">
+          <span class="carte-num">01 — Dépôt</span>
+          <h3>La photo d’origine</h3>
+          <p>
+            L’agent téléverse la photo du bien, ou <%= brand.name %> la récupère
+            directement depuis le logiciel de l’agence. Rien ne change dans ses habitudes.
+          </p>
+        </article>
+
+        <article class="carte reveler">
+          <span class="carte-num">02 — Génération</span>
+          <h3>L’architecture est verrouillée</h3>
+          <p>
+            Le modèle ne redessine pas la maison : il ré-éclaire celle qui existe.
+            Toiture, ouvertures, cadrage et perspective sont explicitement figés.
+            Seuls le ciel, la lumière, la végétation et la météo bougent.
+          </p>
+        </article>
+
+        <article class="carte reveler">
+          <span class="carte-num">03 — Affichage</span>
+          <h3>Le visiteur choisit</h3>
+          <p>
+            Sur l’annonce, un sélecteur discret apparaît sous la photo.
+            Le visiteur clique « Hiver », « Coucher de soleil », ou tape sa propre
+            demande. Le rendu s’affiche instantanément, déjà calculé.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== AMBIANCES -->
+  <section class="section" id="ambiances">
+    <div class="enveloppe">
+      <p class="etiquette">Le catalogue</p>
+      <h2 style="max-width:16ch">Toutes les lumières d’une année.</h2>
+      <p class="chapo mb-2">
+        Chaque ambiance est un réglage éprouvé — pas un texte libre qui donnerait
+        un résultat différent à chaque essai. La cohérence est ce qui rend l’outil
+        utilisable en production.
+      </p>
+
+      <div class="groupes mt-3">
+        <% groups.forEach(function (g) { %>
+          <div class="reveler">
+            <div class="groupe-titre">
+              <h3><%= g.label %></h3>
+              <span><%= g.hint %></span>
+            </div>
+            <div class="pastilles">
+              <% scenesByGroup(g.id).forEach(function (sc) { %>
+                <span class="pastille" title="<%= sc.description %>">
+                  <i style="background:linear-gradient(150deg, <%= sc.visual.skyTop %>, <%= sc.visual.skyBottom %> 55%, <%= sc.visual.ground %>)"></i>
+                  <%= sc.label %>
+                </span>
+              <% }); %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== INTÉGRATION -->
+  <section class="section clair">
+    <div class="enveloppe">
+      <p class="etiquette">L’intégration</p>
+      <h2 style="max-width:18ch">Deux façons de l’installer. Aucune n’est un chantier.</h2>
+
+      <div class="duo mt-3" style="align-items:start">
+        <div class="reveler">
+          <h3>① Le visiteur pilote</h3>
+          <p class="doux">
+            Un sélecteur d’ambiances s’ajoute sous chaque photo d’annonce.
+            Le visiteur clique — ou écrit « je veux voir le jardin en juillet ».
+            Idéal pour les sites d’agence et les portails.
+          </p>
+          <h3 style="margin-top:2rem">② L’agence pré-calcule</h3>
+          <p class="doux">
+            L’administrateur choisit les ambiances à la publication de l’annonce.
+            Les images sont générées une fois, mises en cache, puis servies
+            comme de simples photos. Zéro attente pour le visiteur, coût maîtrisé.
+          </p>
+          <a class="btn btn-vide mt-2" href="/integration">Documentation complète <span class="fleche">→</span></a>
+        </div>
+
+        <div class="reveler">
+          <pre class="pre-code"><code><span class="c">&lt;!-- 1. le script, une fois dans la page --&gt;</span>
+<span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"<%= baseUrl %>/fourseason.js"</span>
+        <span class="a">data-cle</span>=<span class="s">"pk_live_votre_cle"</span> <span class="t">defer&gt;&lt;/script&gt;</span>
+
+<span class="c">&lt;!-- 2. la photo, telle qu'elle existe déjà --&gt;</span>
+<span class="t">&lt;img</span> <span class="a">src</span>=<span class="s">"/photos/villa-glycines.jpg"</span>
+     <span class="a">data-fourseason</span>
+     <span class="a">data-ambiances</span>=<span class="s">"hiver,coucher,nuit,pluie"</span><span class="t">&gt;</span></code></pre>
+          <p class="doux mt-2" style="font-size:.88rem">
+            C’est tout. Le widget détecte l’attribut <code>data-fourseason</code>,
+            insère le sélecteur sous l’image et gère le cache.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ APPEL -->
+  <section class="section">
+    <div class="enveloppe centre" style="max-width:62ch">
+      <p class="etiquette" style="justify-content:center">Prochaine étape</p>
+      <h2>Montrez le bien tel qu’il sera vécu.</h2>
+      <p class="chapo centre">
+        Envoyez-nous une photo d’annonce. Nous vous renvoyons les rendus
+        des quatre saisons sous 24 h, gratuitement, pour que vous jugiez sur pièce.
+      </p>
+      <div class="pile mt-2" style="justify-content:center">
+        <a class="btn btn-or btn-lg" href="/contact">Demander mes 4 rendus <span class="fleche">→</span></a>
+        <a class="btn btn-vide btn-lg" href="/tarifs">Voir les tarifs</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<%- include('../partials/footer') %>

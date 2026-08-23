@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %></title>
+<style>
+  /* Feuille de style volontairement banale : celle d'un site d'agence quelconque.
+     Aucune ligne d'Four Season ici — c'est tout l'intérêt de la démonstration. */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 24px 40px;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2733; background: #fff;
+  }
+  .site { max-width: 640px; margin: 0 auto; }
+  .barre-site {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 14px; margin-bottom: 24px; border-bottom: 1px solid #e6e9ee;
+    font-weight: 700; letter-spacing: .01em; color: #2c3a4d;
+  }
+  .barre-site nav { font-weight: 400; font-size: 14px; color: #8a93a1; }
+  .barre-site nav span { margin-left: 16px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .lieu { color: #8a93a1; font-size: 14px; margin: 0 0 18px; }
+  .prix { font-size: 20px; font-weight: 700; color: #1f2733; }
+  img { width: 100%; height: auto; border-radius: 6px; display: block; background: #eef1f4; }
+  .specs { display: flex; gap: 22px; margin: 20px 0 14px; font-size: 14px; color: #55607a; }
+  .specs b { display: block; color: #1f2733; font-size: 16px; }
+  p.texte { font-size: 15px; color: #48526a; }
+  .note {
+    margin-top: 28px; padding: 12px 14px; border-left: 3px solid #E0A458;
+    background: #fdf7ee; font-size: 13px; color: #6b5636;
+  }
+</style>
+</head>
+<body>
+  <div class="site">
+    <div class="barre-site">
+      Agence Durand &amp; Fils
+      <nav><span>Acheter</span><span>Louer</span><span>Estimer</span></nav>
+    </div>
+
+    <h1>Maison de famille, 6 pièces</h1>
+    <p class="lieu">Annecy-le-Vieux · Réf. 2417 · <span class="prix">745 000 €</span></p>
+
+    <!-- La seule modification apportée à ce site : l'attribut data-fourseason.
+         Ici, les ambiances sont pré-calculées (mode 2), donc aucun appel réseau. -->
+    <img src="/embed/scene/midi.svg"
+         alt="Façade sud de la maison"
+         data-fourseason
+         data-variantes='<%= JSON.stringify(Object.fromEntries(scenes.map(s => [s.id, `/embed/scene/${s.id}.svg`]))) %>'>
+
+    <div class="specs">
+      <span><b>178 m²</b>habitables</span>
+      <span><b>820 m²</b>de terrain</span>
+      <span><b>4</b>chambres</span>
+      <span><b>C</b>DPE</span>
+    </div>
+
+    <p class="texte">
+      Maison de caractère orientée plein sud, au calme, à dix minutes du lac.
+      Vaste séjour traversant, cuisine ouverte sur la terrasse, jardin clos et arboré.
+    </p>
+
+    <p class="note">
+      Cette page imite un site d’agence ordinaire. Les vignettes sous la photo
+      sont ajoutées par le widget <%= brand.name %>, chargé en une ligne.
+    </p>
+  </div>
+
+  <script src="/fourseason.js" data-libre="non" defer></script>
+</body>
+</html>

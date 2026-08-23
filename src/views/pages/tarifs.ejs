@@ -1,0 +1,104 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="principal">
+  <section class="section" style="padding-bottom:2.5rem">
+    <div class="enveloppe">
+      <p class="etiquette">Tarifs</p>
+      <h2 style="max-width:16ch">On facture ce qui est généré. Rien d’autre.</h2>
+      <p class="chapo">
+        Une ambiance générée = un crédit. Une image déjà calculée est resservie
+        gratuitement, autant de fois qu’il le faut. Pas de frais de mise en service,
+        pas d’engagement de durée.
+      </p>
+    </div>
+  </section>
+
+  <section style="padding-bottom:clamp(4rem,8vw,7rem)">
+    <div class="enveloppe">
+      <div class="offres">
+        <% brand.plans.forEach(function (p) { %>
+          <div class="offre <%= p.highlight ? 'phare' : '' %> reveler">
+            <% if (p.highlight) { %><span class="offre-fanion">Le plus choisi</span><% } %>
+            <h3><%= p.name %></h3>
+            <div class="offre-prix">
+              <% if (p.price === 0) { %>0 €<% } else if (p.price === null) { %>Sur devis<% } else { %><%= p.price %> €<% } %>
+              <small>/ <%= p.period %></small>
+            </div>
+            <p class="doux" style="font-size:.93rem;margin:0"><%= p.pitch %></p>
+            <ul>
+              <% p.features.forEach(function (f) { %><li><span><%= f %></span></li><% }); %>
+            </ul>
+            <a class="btn <%= p.highlight ? 'btn-or' : 'btn-vide' %>" href="/contact?offre=<%= p.id %>">
+              <%= p.cta %>
+            </a>
+          </div>
+        <% }); %>
+      </div>
+
+      <p class="doux centre mt-3" style="font-size:.88rem;max-width:60ch">
+        Tarifs hors taxes. Un crédit non consommé sur le forfait Agence est reporté
+        un mois. Au-delà du forfait, l’ambiance supplémentaire est facturée 0,25 € HT.
+      </p>
+    </div>
+  </section>
+
+  <section class="section clair">
+    <div class="enveloppe">
+      <p class="etiquette">Questions fréquentes</p>
+      <h2 style="max-width:16ch">Ce qu’on nous demande à chaque fois.</h2>
+
+      <div class="grille mt-3">
+        <div>
+          <span class="carte-num">01</span>
+          <h3>Est-ce trompeur pour l’acheteur ?</h3>
+          <p>
+            Chaque rendu porte une mention explicite : « vue simulée, sans valeur
+            contractuelle ». L’objectif est d’aider à se projeter, pas de masquer un défaut.
+            L’architecture, elle, n’est jamais modifiée — c’est le cœur technique du produit.
+          </p>
+        </div>
+        <div>
+          <span class="carte-num">02</span>
+          <h3>Que devient ma photo d’origine ?</h3>
+          <p>
+            Elle est conservée le temps de générer les ambiances, puis supprimée
+            sur demande. Elle n’est jamais utilisée pour entraîner un modèle
+            et n’est jamais revendue.
+          </p>
+        </div>
+        <div>
+          <span class="carte-num">03</span>
+          <h3>Et si le rendu est raté ?</h3>
+          <p>
+            Vous relancez la génération sans consommer de crédit supplémentaire,
+            dans la limite de deux essais par ambiance. Un rendu qui déforme
+            l’architecture est un bug de notre côté, pas de votre budget.
+          </p>
+        </div>
+        <div>
+          <span class="carte-num">04</span>
+          <h3>Ça marche sur les photos d’intérieur ?</h3>
+          <p>
+            La lumière du jour à travers les fenêtres, oui. Les saisons, non —
+            elles n’ont pas de sens dans un salon. Le produit est d’abord pensé
+            pour les extérieurs, façades et jardins.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="enveloppe centre" style="max-width:56ch">
+      <h2>Essayez avant de payer.</h2>
+      <p class="chapo centre">
+        Envoyez-nous une photo d’annonce : nous vous renvoyons les quatre saisons
+        sous 24 h, sans engagement.
+      </p>
+      <a class="btn btn-or btn-lg mt-2" href="/contact">Demander mes 4 rendus <span class="fleche">→</span></a>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

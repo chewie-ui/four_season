@@ -1,0 +1,64 @@
+# Déploiement sur un VPS, en trois conteneurs.
+#
+#   cp .env.production.example .env && nano .env    # remplir AVANT
+#   docker compose up -d --build
+#   docker compose exec web npm run db:migrate
+#   docker compose exec web npm run preflight
+#
+# Le reverse proxy (nginx / Caddy) reste devant, hors de ce fichier :
+# c'est lui qui porte HTTPS. Voir deploy/nginx.conf.
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-p${DB_ROOT_PASSWORD}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # La base n'est PAS exposée à l'extérieur : seuls web et worker y accèdent.
+    expose:
+      - '3306'
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: db
+      WORKER_INLINE: 'false'   # le worker est un service à part
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - storage:/app/storage
+    ports:
+      # écoute en local seulement : c'est le reverse proxy qui publie
+      - '127.0.0.1:3000:3000'
+
+  worker:
+    build: .
+    restart: unless-stopped
+    command: ['node', 'src/worker.js']
+    env_file: .env
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # même volume que le web : le worker écrit les images, le web les sert
+      - storage:/app/storage
+
+volumes:
+  db-data:
+  storage:   # les images générées vivent ici — à sauvegarder

@@ -1,0 +1,144 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="principal">
+  <section class="section" style="padding-bottom:2rem">
+    <div class="enveloppe">
+      <p class="etiquette">Démo</p>
+      <h2 style="max-width:18ch">Votre photo, sous une autre lumière.</h2>
+      <p class="chapo">
+        Déposez une photo d’extérieur d’un bien, choisissez une ambiance,
+        et comparez. Le rendu porte un filigrane et la démo est limitée
+        à quelques essais par heure — le calcul a un coût réel.
+      </p>
+    </div>
+  </section>
+
+  <section style="padding-bottom:clamp(4rem,8vw,7rem)">
+    <div class="enveloppe duo inverse" style="align-items:start">
+
+      <!-- ------------------------------------------------ zone de rendu -->
+      <div>
+        <div class="visionneuse" data-visionneuse>
+          <div class="vis-barre">
+            <span class="vis-pastilles" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span data-nom-fichier>aucune photo — exemple illustré</span>
+          </div>
+
+          <div class="scene-stage" data-stage style="position:relative">
+            <%- include('../partials/scene', { sid: 'demo' }) %>
+            <img data-apercu alt="" hidden
+                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1">
+            <div data-attente hidden
+                 style="position:absolute;inset:0;z-index:3;display:grid;place-items:center;
+                        background:color-mix(in srgb, #0B1220 72%, transparent);backdrop-filter:blur(3px)">
+              <div style="text-align:center">
+                <div class="rotateur" aria-hidden="true"></div>
+                <p style="margin:.9rem 0 0;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--or)">
+                  Génération en cours
+                </p>
+                <p class="doux" style="font-size:.85rem;margin:.35rem 0 0">15 à 40 secondes</p>
+              </div>
+            </div>
+            <div class="vis-etiquette" style="z-index:2">
+              <b data-etiquette-titre>Plein jour</b>
+              <span data-etiquette-detail>13 h</span>
+            </div>
+          </div>
+
+          <div class="vis-choix" role="group" aria-label="Ambiances d’aperçu">
+            <% ['midi','coucher','heure-bleue','automne','hiver','pluie'].forEach(function (id, i) {
+                 const sc = scenes.find(s => s.id === id); %>
+              <button type="button" data-scene="<%= sc.id %>"
+                      data-vars='<%= JSON.stringify(sc.visual) %>'
+                      data-label="<%= sc.label %>" data-short="<%= sc.short %>"
+                      aria-pressed="<%= i === 0 ? 'true' : 'false' %>">
+                <%= sc.label %><small><%= sc.short %></small>
+              </button>
+            <% }); %>
+          </div>
+        </div>
+
+        <p class="doux mt-2" style="font-size:.85rem">
+          Tant qu’aucune photo n’est envoyée, la scène ci-dessus est une illustration
+          vectorielle : la même maison, redessinée par de simples variables.
+          C’est le principe — l’IA fait la même chose sur une vraie photo.
+        </p>
+      </div>
+
+      <!-- ------------------------------------------------- formulaire -->
+      <div>
+        <form data-formulaire-demo>
+          <div class="champ">
+            <label for="photo">Photo du bien <span class="opt">— JPEG, PNG ou WebP, 10 Mo max</span></label>
+            <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp" required>
+          </div>
+
+          <div class="champ">
+            <label for="scene">Ambiance</label>
+            <select id="scene" name="scene" required>
+              <% groups.forEach(function (g) { %>
+                <optgroup label="<%= g.label %>">
+                  <% scenesByGroup(g.id).forEach(function (sc) { %>
+                    <option value="<%= sc.id %>" <%= sc.id === 'hiver' ? 'selected' : '' %>>
+                      <%= sc.label %> — <%= sc.short %>
+                    </option>
+                  <% }); %>
+                </optgroup>
+              <% }); %>
+            </select>
+          </div>
+
+          <div class="champ">
+            <label for="consigne">Consigne libre <span class="opt">— facultatif</span></label>
+            <input type="text" id="consigne" name="consigne" maxlength="200"
+                   placeholder="ex. : ajouter de la neige sur les haies">
+          </div>
+
+          <button class="btn btn-or btn-lg" type="submit" style="width:100%">
+            Générer l’ambiance <span class="fleche">→</span>
+          </button>
+
+          <div data-message role="status" aria-live="polite" style="margin-top:1.2rem"></div>
+        </form>
+
+        <div style="margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--trait)">
+          <h4>Ce qui est préservé</h4>
+          <ul class="doux" style="font-size:.92rem;padding-left:1.1rem;margin:.6rem 0 0">
+            <li>La forme et la pente du toit</li>
+            <li>Le nombre et la position des ouvertures</li>
+            <li>Les matériaux et la couleur de façade</li>
+            <li>Le cadrage, la focale et la perspective</li>
+          </ul>
+          <h4 style="margin-top:1.6rem">Ce qui change</h4>
+          <ul class="doux" style="font-size:.92rem;padding-left:1.1rem;margin:.6rem 0 0">
+            <li>Le ciel et la lumière</li>
+            <li>L’état de la végétation</li>
+            <li>La météo et le sol (neige, sol mouillé)</li>
+            <li>L’éclairage intérieur et extérieur</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<style>
+  /* Un `display` en style inline l'emporte sur l'attribut `hidden` : sans ce
+     !important, le voile « génération en cours » ne se masque jamais. */
+  [hidden] { display: none !important; }
+
+  .rotateur {
+    width: 34px; height: 34px; margin-inline: auto;
+    border: 2px solid rgba(224, 164, 88, .22);
+    border-top-color: var(--or);
+    border-radius: 50%;
+    animation: tourner .85s linear infinite;
+  }
+  @keyframes tourner { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .rotateur { animation-duration: 3s; } }
+  input[type=file] { padding: .6rem; font-size: .88rem; }
+</style>
+
+<script src="/js/demo.js" defer></script>
+<%- include('../partials/footer') %>

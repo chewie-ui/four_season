@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>Four Season</title>
+  <!-- Version favicon : tuile pleine plutôt que disque, formes épaissies.
+       À 16 px, la couleur porte plus que le détail. -->
+  <defs>
+    <clipPath id="fv"><rect x="0" y="0" width="32" height="32" rx="7"/></clipPath>
+    <path id="fvm" d="M16 7 28 16.4 28 17.6 25 17.6 25 25.6 7 25.6 7 17.6 4 17.6 4 16.4Z"/>
+  </defs>
+  <g clip-path="url(#fv)">
+    <rect x="0"  y="0"  width="16" height="16" fill="#7A9E7E"/>
+    <rect x="16" y="0"  width="16" height="16" fill="#E0A458"/>
+    <rect x="16" y="16" width="16" height="16" fill="#C4703F"/>
+    <rect x="0"  y="16" width="16" height="16" fill="#7FA8C9"/>
+    <g transform="translate(16 16.6) scale(.92) translate(-16 -16.6)">
+      <use href="#fvm" fill="none" stroke="#F6F1E8" stroke-width="2.6" stroke-linejoin="round"/>
+      <use href="#fvm" fill="#0B1220"/>
+      <rect x="13.6" y="19.6" width="4.8" height="6" rx=".7" fill="#F2C879"/>
+    </g>
+  </g>
+</svg>

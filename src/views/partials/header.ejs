@@ -1,0 +1,45 @@
+<header class="entete">
+  <div class="entete-int">
+    <a class="marque" href="/">
+      <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <defs>
+          <clipPath id="hq1"><rect x="0"  y="0"  width="32" height="32"/></clipPath>
+          <clipPath id="hq2"><rect x="32" y="0"  width="32" height="32"/></clipPath>
+          <clipPath id="hq3"><rect x="32" y="32" width="32" height="32"/></clipPath>
+          <clipPath id="hq4"><rect x="0"  y="32" width="32" height="32"/></clipPath>
+          <linearGradient id="hp" x1="0" y1="0" x2=".7" y2="1">
+            <stop offset="0" stop-color="#9BBB9C"/><stop offset="1" stop-color="#6E9273"/>
+          </linearGradient>
+          <linearGradient id="he" x1="1" y1="0" x2=".3" y2="1">
+            <stop offset="0" stop-color="#F6CE80"/><stop offset="1" stop-color="#DB9A44"/>
+          </linearGradient>
+          <linearGradient id="ha" x1="1" y1="1" x2=".3" y2="0">
+            <stop offset="0" stop-color="#D5834D"/><stop offset="1" stop-color="#B66234"/>
+          </linearGradient>
+          <linearGradient id="hh" x1="0" y1="1" x2=".7" y2="0">
+            <stop offset="0" stop-color="#9CBDD8"/><stop offset="1" stop-color="#6D99BD"/>
+          </linearGradient>
+          <path id="hm" d="M32 16.6 53 33.1 53 34.6 47.6 34.6 47.6 49 16.4 49 16.4 34.6 11 34.6 11 33.1Z"/>
+        </defs>
+        <g clip-path="url(#hq1)"><circle cx="32" cy="32" r="30" fill="url(#hp)"/></g>
+        <g clip-path="url(#hq2)"><circle cx="32" cy="32" r="30" fill="url(#he)"/></g>
+        <g clip-path="url(#hq3)"><circle cx="32" cy="32" r="30" fill="url(#ha)"/></g>
+        <g clip-path="url(#hq4)"><circle cx="32" cy="32" r="30" fill="url(#hh)"/></g>
+        <path d="M32 2 V62 M2 32 H62" stroke="#F6F1E8" stroke-width="1.1" opacity=".4"/>
+        <g transform="translate(32 32.8) scale(.86) translate(-32 -32.8)">
+          <use href="#hm" fill="none" stroke="#F6F1E8" stroke-width="3.6" stroke-linejoin="round"/>
+          <use href="#hm" fill="#0B1220"/>
+          <rect x="28.6" y="39.2" width="6.8" height="9.8" rx="1" fill="#F2C879"/>
+        </g>
+      </svg>
+      <%= brand.name %>
+    </a>
+
+    <nav aria-label="Navigation principale">
+      <a class="lien-nav" href="/demo"        <%= path === '/demo' ? 'aria-current="page"' : '' %>>Démo</a>
+      <a class="lien-nav" href="/integration" <%= path === '/integration' ? 'aria-current="page"' : '' %>>Intégration</a>
+      <a class="lien-nav" href="/tarifs"      <%= path === '/tarifs' ? 'aria-current="page"' : '' %>>Tarifs</a>
+      <a class="btn btn-vide" href="/contact">Nous parler</a>
+    </nav>
+  </div>
+</header>

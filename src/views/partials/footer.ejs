@@ -1,0 +1,49 @@
+<footer class="pied">
+  <div class="enveloppe">
+    <div class="pied-grille">
+      <div>
+        <div class="marque" style="margin-bottom:1rem">
+          <img src="/img/logo.svg" alt="" width="30" height="30" aria-hidden="true">
+          <%= brand.name %>
+        </div>
+        <p class="doux" style="font-size:.9rem;max-width:26ch"><%= brand.tagline %></p>
+      </div>
+
+      <div>
+        <h4>Produit</h4>
+        <ul>
+          <li><a href="/demo">Démo en direct</a></li>
+          <li><a href="/integration">Intégration</a></li>
+          <li><a href="/tarifs">Tarifs</a></li>
+          <li><a href="/#ambiances">Les ambiances</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Société</h4>
+        <ul>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Écrire</h4>
+        <ul>
+          <li><a href="mailto:<%= brand.email %>"><%= brand.email %></a></li>
+          <li><a href="tel:<%= brand.phone.replace(/\s/g, '') %>"><%= brand.phone %></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pied-bas">
+      <span>© <%= year %> <%= brand.legalName %></span>
+      <span>Les rendus sont des simulations générées par IA, sans valeur contractuelle.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/site.js" defer></script>
+</body>
+</html>

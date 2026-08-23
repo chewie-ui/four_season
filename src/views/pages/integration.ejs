@@ -1,0 +1,180 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="principal">
+  <section class="section" style="padding-bottom:2rem">
+    <div class="enveloppe">
+      <p class="etiquette">Intégration</p>
+      <h2 style="max-width:20ch">Deux lignes dans la page. Rien à installer.</h2>
+      <p class="chapo">
+        Le widget vit dans un Shadow DOM : le CSS de votre site ne peut pas le casser,
+        et il ne peut rien casser chez vous. Il fonctionne sur WordPress, sur un site
+        sur mesure, sur un portail — partout où vous pouvez poser une balise
+        <code>&lt;script&gt;</code>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================== MODE 1 : LE VISITEUR -->
+  <section class="section">
+    <div class="enveloppe">
+      <p class="etiquette">Mode 1</p>
+      <h2 style="max-width:22ch">Le visiteur choisit lui-même.</h2>
+      <p class="chapo mb-2">
+        Un sélecteur apparaît sous la photo. Le visiteur clique une ambiance,
+        ou décrit ce qu’il veut voir. Le rendu est calculé à la demande, puis mis
+        en cache : le deuxième visiteur qui demande « hiver » ne coûte rien.
+      </p>
+
+      <div class="duo mt-3" style="align-items:start">
+        <div>
+          <div class="onglets" data-onglets role="tablist" aria-label="Exemples d’intégration">
+            <button role="tab" aria-selected="true" aria-controls="ex-html" id="t-html">HTML</button>
+            <button role="tab" aria-selected="false" aria-controls="ex-wp" id="t-wp">WordPress</button>
+            <button role="tab" aria-selected="false" aria-controls="ex-js" id="t-js">JavaScript</button>
+          </div>
+
+          <div id="ex-html" role="tabpanel" aria-labelledby="t-html">
+            <pre class="pre-code"><code><span class="c">&lt;!-- une fois, avant &lt;/body&gt; --&gt;</span>
+<span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"<%= baseUrl %>/fourseason.js"</span>
+        <span class="a">data-cle</span>=<span class="s">"pk_live_votre_cle"</span> <span class="t">defer&gt;&lt;/script&gt;</span>
+
+<span class="c">&lt;!-- sur chaque photo à enrichir --&gt;</span>
+<span class="t">&lt;img</span> <span class="a">src</span>=<span class="s">"/photos/villa.jpg"</span>
+     <span class="a">alt</span>=<span class="s">"Villa Les Glycines"</span>
+     <span class="a">data-fourseason</span>
+     <span class="a">data-ambiances</span>=<span class="s">"hiver,coucher,heure-bleue,pluie"</span><span class="t">&gt;</span></code></pre>
+          </div>
+
+          <div id="ex-wp" role="tabpanel" aria-labelledby="t-wp" hidden>
+            <pre class="pre-code"><code><span class="c">// functions.php du thème enfant</span>
+<span class="t">add_action</span>(<span class="s">'wp_enqueue_scripts'</span>, <span class="t">function</span> () {
+  <span class="t">wp_enqueue_script</span>(
+    <span class="s">'fourseason'</span>,
+    <span class="s">'<%= baseUrl %>/fourseason.js'</span>,
+    [], <span class="a">null</span>, <span class="a">true</span>
+  );
+});
+
+<span class="c">// puis, dans le template d'annonce</span>
+<span class="t">&lt;img</span> <span class="a">src</span>=<span class="s">"&lt;?= $photo ?&gt;"</span> <span class="a">data-fourseason</span>
+     <span class="a">data-ambiances</span>=<span class="s">"hiver,coucher,nuit"</span><span class="t">&gt;</span></code></pre>
+            <p class="doux mt-2" style="font-size:.88rem">
+              La clé publique se pose via <code>wp_localize_script</code> ou en dur
+              dans l’attribut <code>data-cle</code> — elle est conçue pour être visible,
+              c’est le filtre par domaine qui la protège.
+            </p>
+          </div>
+
+          <div id="ex-js" role="tabpanel" aria-labelledby="t-js" hidden>
+            <pre class="pre-code"><code><span class="c">// annonces chargées en AJAX : le widget les détecte seul,</span>
+<span class="c">// mais vous pouvez aussi équiper une image à la main</span>
+<span class="t">Four Season</span>.<span class="a">equiper</span>(<span class="t">document</span>.<span class="a">querySelector</span>(<span class="s">'#photo-principale'</span>));
+
+<span class="c">// ou relancer un balayage complet</span>
+<span class="t">Four Season</span>.<span class="a">balayer</span>();</code></pre>
+          </div>
+        </div>
+
+        <div>
+          <h4>Attributs disponibles</h4>
+          <div class="grille" style="margin-top:1rem;grid-template-columns:1fr">
+            <div>
+              <span class="carte-num">data-ambiances</span>
+              <p>Liste ordonnée des boutons, séparés par des virgules. Par défaut :
+              <code>midi, coucher, heure-bleue, hiver</code>.</p>
+            </div>
+            <div>
+              <span class="carte-num">data-variantes</span>
+              <p>JSON <code>{"ambiance": "url"}</code> d’images déjà générées.
+              Aucun appel réseau, affichage instantané.</p>
+            </div>
+            <div>
+              <span class="carte-num">data-libre="non"</span>
+              <p>Sur la balise <code>&lt;script&gt;</code> : retire le champ de saisie
+              libre et ne laisse que les boutons.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================ MODE 2 : L'AGENCE -->
+  <section class="section clair">
+    <div class="enveloppe">
+      <p class="etiquette">Mode 2</p>
+      <h2 style="max-width:22ch">L’agence pré-calcule à la publication.</h2>
+      <p class="chapo mb-2">
+        À la mise en ligne de l’annonce, votre serveur demande les ambiances voulues.
+        Les images reviennent sous forme d’URL classiques, que vous stockez comme
+        n’importe quelle photo. Le visiteur n’attend jamais, et vous maîtrisez
+        exactement votre consommation.
+      </p>
+
+      <div class="duo mt-3" style="align-items:start">
+        <div>
+          <pre class="pre-code"><code><span class="c">// Node.js — à la publication d'une annonce</span>
+<span class="t">const</span> rep = <span class="t">await</span> <span class="a">fetch</span>(<span class="s">'<%= baseUrl %>/api/v1/render'</span>, {
+  method: <span class="s">'POST'</span>,
+  headers: {
+    <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>,
+    <span class="s">'Authorization'</span>: <span class="s">`Bearer ${process.env.AURELO_SECRET}`</span>
+  },
+  body: <span class="t">JSON</span>.<span class="a">stringify</span>({
+    image: <span class="s">'https://mon-agence.fr/photos/villa.jpg'</span>,
+    scenes: [<span class="s">'hiver'</span>, <span class="s">'coucher'</span>, <span class="s">'heure-bleue'</span>],
+    reference: <span class="s">'ANNONCE-2417'</span>
+  })
+});
+
+<span class="t">const</span> { variantes } = <span class="t">await</span> rep.<span class="a">json</span>();
+<span class="c">// → [{ scene: 'hiver', url: 'https://cdn.fourseason.fr/…' }, …]</span></code></pre>
+        </div>
+
+        <div>
+          <h4>Puis, dans votre template</h4>
+          <pre class="pre-code" style="margin-top:1rem"><code><span class="t">&lt;img</span> <span class="a">src</span>=<span class="s">"/photos/villa.jpg"</span> <span class="a">data-fourseason</span>
+     <span class="a">data-variantes</span>=<span class="s">'{"hiver":"…","coucher":"…"}'</span><span class="t">&gt;</span></code></pre>
+          <p class="doux mt-2" style="font-size:.9rem">
+            Le widget se contente alors de basculer entre des images déjà présentes.
+            Il fonctionne même si nos serveurs sont injoignables.
+          </p>
+
+          <h4 style="margin-top:2rem">Sécurité</h4>
+          <ul class="doux" style="font-size:.92rem;padding-left:1.1rem">
+            <li><b>Clé publique</b> (<code>pk_</code>) : posée en clair, bridée à vos domaines déclarés.</li>
+            <li><b>Clé secrète</b> (<code>sk_</code>) : serveur à serveur uniquement, jamais dans une page.</li>
+            <li>Quota et plafond de dépense configurables par compte.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ ESSAI -->
+  <section class="section">
+    <div class="enveloppe">
+      <p class="etiquette">En situation</p>
+      <h2 style="max-width:20ch">Le widget, tel qu’il apparaît chez vous.</h2>
+      <p class="chapo mb-2">
+        Ci-dessous, une page volontairement neutre — aucun style d’Four Season —
+        avec le widget posé sous une photo d’annonce.
+      </p>
+      <iframe class="cadre-demo mt-2" src="/embed/exemple" title="Exemple d’intégration du widget" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="enveloppe centre" style="max-width:56ch">
+      <h2>Une question d’intégration ?</h2>
+      <p class="chapo centre">
+        Dites-nous quel logiciel de gestion vous utilisez — Apimo, Hektor, Netty,
+        ou un développement maison. Nous vous répondons avec un exemple concret.
+      </p>
+      <a class="btn btn-or btn-lg mt-2" href="/contact">Nous écrire <span class="fleche">→</span></a>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

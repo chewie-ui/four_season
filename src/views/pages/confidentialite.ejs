@@ -1,0 +1,81 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="principal">
+  <section class="section">
+    <div class="enveloppe">
+      <p class="etiquette">RGPD</p>
+      <h2>Politique de confidentialité</h2>
+
+      <div class="avis mt-2" style="max-width:68ch">
+        <b>Brouillon de travail.</b> Ce texte reflète l’architecture technique réellement
+        mise en place. Il doit être relu et complété (identité du responsable de traitement,
+        durées définitives, sous-traitants) avant toute mise en production.
+      </div>
+
+      <div class="contenu-texte mt-3">
+        <h2>Responsable de traitement</h2>
+        <p>
+          <%= brand.legalName %>, [adresse]. Contact :
+          <a href="mailto:<%= brand.email %>"><%= brand.email %></a>.
+        </p>
+
+        <h2>Données collectées</h2>
+        <ul>
+          <li><b>Formulaire de contact</b> : nom, email, agence, téléphone, message,
+            volume déclaré. Base légale : intérêt légitime (relation commerciale demandée).</li>
+          <li><b>Compte client</b> : email, mot de passe haché (argon2id), nom.
+            Base légale : exécution du contrat.</li>
+          <li><b>Photographies transmises</b> : les images de biens envoyées pour traitement.
+            Base légale : exécution du contrat.</li>
+          <li><b>Journaux techniques</b> : adresse IP hachée, horodatage, agent utilisateur.
+            Base légale : intérêt légitime (sécurité, lutte contre l’abus).</li>
+        </ul>
+
+        <h2>Ce que nous ne faisons pas</h2>
+        <ul>
+          <li>Aucune revente ni location de données.</li>
+          <li>Aucun cookie publicitaire, aucun traceur tiers sur le site.</li>
+          <li>Aucune utilisation de vos photographies pour entraîner un modèle d’IA.</li>
+        </ul>
+
+        <h2>Sous-traitants</h2>
+        <p>
+          La génération d’images repose sur l’API Google Gemini. Les photographies
+          transmises sont envoyées à Google pour le seul temps du traitement.
+          Le traitement peut impliquer un transfert hors Union européenne, encadré
+          par les clauses contractuelles types de la Commission européenne.
+          Ce point doit être explicitement porté à la connaissance de vos propres clients.
+        </p>
+
+        <h2>Durées de conservation</h2>
+        <ul>
+          <li>Prospects non convertis : 3 ans à compter du dernier contact.</li>
+          <li>Photographies d’origine : le temps de l’abonnement, puis 30 jours.</li>
+          <li>Images générées : le temps de l’abonnement, puis 30 jours.</li>
+          <li>Journaux techniques : 12 mois.</li>
+          <li>Pièces comptables : 10 ans (obligation légale).</li>
+        </ul>
+
+        <h2>Vos droits</h2>
+        <p>
+          Vous disposez d’un droit d’accès, de rectification, d’effacement, de limitation,
+          d’opposition et de portabilité. Écrivez à
+          <a href="mailto:<%= brand.email %>"><%= brand.email %></a> ;
+          nous répondons sous un mois. Vous pouvez introduire une réclamation
+          auprès de la CNIL (<a href="https://www.cnil.fr" rel="noopener">cnil.fr</a>).
+        </p>
+
+        <h2>Cookies</h2>
+        <p>
+          Le site vitrine ne dépose aucun cookie de mesure d’audience ni de publicité.
+          Le widget utilise uniquement le <code>sessionStorage</code> du navigateur du visiteur,
+          pour éviter de recalculer une image déjà affichée. Cette donnée est purement
+          technique, reste sur l’appareil et disparaît à la fermeture de l’onglet.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

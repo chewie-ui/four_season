@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Four Season">
+  <title>Four Season</title>
+  <!--
+    Le signe : un disque partagé en quatre quartiers — printemps, été, automne,
+    hiver — et une seule maison, posée au centre, qui traverse les quatre.
+    L'année tourne, le bien ne change pas. Une fenêtre reste allumée quelle que
+    soit la saison : c'est la promesse du produit en un pictogramme.
+
+    Le liseré crème autour de la maison n'est pas décoratif : sans lui, la
+    maison sombre disparaît dans un fond sombre. Il rend le logo posable
+    sur n'importe quelle couleur.
+  -->
+  <defs>
+    <clipPath id="fs-q1"><rect x="0"  y="0"  width="32" height="32"/></clipPath>
+    <clipPath id="fs-q2"><rect x="32" y="0"  width="32" height="32"/></clipPath>
+    <clipPath id="fs-q3"><rect x="32" y="32" width="32" height="32"/></clipPath>
+    <clipPath id="fs-q4"><rect x="0"  y="32" width="32" height="32"/></clipPath>
+
+    <linearGradient id="fs-printemps" x1="0" y1="0" x2=".7" y2="1">
+      <stop offset="0" stop-color="#9BBB9C"/><stop offset="1" stop-color="#6E9273"/>
+    </linearGradient>
+    <linearGradient id="fs-ete" x1="1" y1="0" x2=".3" y2="1">
+      <stop offset="0" stop-color="#F6CE80"/><stop offset="1" stop-color="#DB9A44"/>
+    </linearGradient>
+    <linearGradient id="fs-automne" x1="1" y1="1" x2=".3" y2="0">
+      <stop offset="0" stop-color="#D5834D"/><stop offset="1" stop-color="#B66234"/>
+    </linearGradient>
+    <linearGradient id="fs-hiver" x1="0" y1="1" x2=".7" y2="0">
+      <stop offset="0" stop-color="#9CBDD8"/><stop offset="1" stop-color="#6D99BD"/>
+    </linearGradient>
+
+    <path id="fs-maison" d="M32 16.6 53 33.1 53 34.6 47.6 34.6 47.6 49 16.4 49 16.4 34.6 11 34.6 11 33.1Z"/>
+  </defs>
+
+  <!-- les quatre saisons, dans le sens de l'année -->
+  <g clip-path="url(#fs-q1)"><circle cx="32" cy="32" r="30" fill="url(#fs-printemps)"/></g>
+  <g clip-path="url(#fs-q2)"><circle cx="32" cy="32" r="30" fill="url(#fs-ete)"/></g>
+  <g clip-path="url(#fs-q3)"><circle cx="32" cy="32" r="30" fill="url(#fs-automne)"/></g>
+  <g clip-path="url(#fs-q4)"><circle cx="32" cy="32" r="30" fill="url(#fs-hiver)"/></g>
+
+  <!-- la césure entre les saisons -->
+  <path d="M32 2 V62 M2 32 H62" stroke="#F6F1E8" stroke-width="1.1" opacity=".4"/>
+
+  <!-- la maison, constante — détourée puis pleine -->
+  <g transform="translate(32 32.8) scale(.86) translate(-32 -32.8)">
+    <use href="#fs-maison" fill="none" stroke="#F6F1E8" stroke-width="3.6" stroke-linejoin="round"/>
+    <use href="#fs-maison" fill="#0B1220"/>
+    <!-- la fenêtre allumée : le seul point chaud, en toute saison -->
+    <rect x="28.6" y="39.2" width="6.8" height="9.8" rx="1" fill="#F2C879"/>
+  </g>
+</svg>

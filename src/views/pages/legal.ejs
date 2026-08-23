@@ -1,0 +1,71 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="principal">
+  <section class="section">
+    <div class="enveloppe">
+      <p class="etiquette">Informations légales</p>
+      <h2>Mentions légales</h2>
+
+      <div class="avis mt-2" style="max-width:68ch">
+        <b>À compléter avant la mise en ligne.</b> Les champs entre crochets doivent être
+        renseignés avec les informations réelles de la société une fois celle-ci immatriculée.
+        Une mention légale incomplète est une infraction à l’article 6-III de la LCEN.
+      </div>
+
+      <div class="contenu-texte mt-3">
+        <h2>Éditeur du site</h2>
+        <p>
+          <%= brand.legalName %> — [forme juridique], au capital de [montant] €<br>
+          Siège social : [adresse complète]<br>
+          RCS [ville] — SIREN [numéro]<br>
+          TVA intracommunautaire : [FR00000000000]<br>
+          Directeur de la publication : [nom du représentant légal]<br>
+          Contact : <a href="mailto:<%= brand.email %>"><%= brand.email %></a>
+        </p>
+
+        <h2>Hébergement</h2>
+        <p>
+          [Nom de l’hébergeur]<br>
+          [Adresse de l’hébergeur]<br>
+          [Téléphone de l’hébergeur]
+        </p>
+
+        <h2>Propriété intellectuelle</h2>
+        <p>
+          L’ensemble des éléments du site — structure, textes, identité visuelle,
+          code source — est la propriété de <%= brand.legalName %>, sauf mention contraire.
+          Toute reproduction sans autorisation écrite est interdite.
+        </p>
+        <p>
+          Les photographies fournies par les clients restent leur entière propriété.
+          <%= brand.legalName %> n’acquiert aucun droit sur ces images au-delà du traitement
+          nécessaire à la fourniture du service.
+        </p>
+
+        <h2>Nature des images générées</h2>
+        <p>
+          Les images produites par le service sont des <b>simulations</b> obtenues par
+          intelligence artificielle à partir d’une photographie réelle. Elles représentent
+          une projection de conditions de lumière, de saison ou de météo, et
+          <b>n’ont aucune valeur contractuelle</b>. Elles ne sauraient constituer
+          une description du bien au sens des articles L. 111-1 et suivants du Code
+          de la consommation.
+        </p>
+        <p>
+          Il appartient à l’agence utilisatrice de conserver la photographie d’origine
+          accessible et d’afficher la mention de simulation à proximité de chaque rendu.
+        </p>
+
+        <h2>Responsabilité</h2>
+        <p>
+          <%= brand.legalName %> met en œuvre les moyens raisonnables pour assurer
+          l’exactitude et la disponibilité du service, sans garantie d’absence
+          d’interruption ou d’erreur.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,114 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="principal">
+  <section class="section">
+    <div class="enveloppe duo" style="align-items:start">
+
+      <div>
+        <p class="etiquette">Contact</p>
+        <% if (sent) { %>
+          <h2 style="max-width:14ch">Message reçu.</h2>
+          <p class="chapo">
+            Merci. Nous revenons vers vous sous 24 h ouvrées.
+            Si vous nous avez indiqué une photo d’annonce, vous recevrez
+            les quatre saisons en pièce jointe.
+          </p>
+          <a class="btn btn-vide mt-2" href="/">Retour à l’accueil</a>
+        <% } else { %>
+          <h2 style="max-width:14ch">Parlons de votre agence.</h2>
+          <p class="chapo">
+            Dites-nous combien de biens vous publiez par mois et quel logiciel
+            vous utilisez. Nous vous répondons avec une estimation concrète —
+            et, si vous le voulez, une photo de votre catalogue déjà retravaillée.
+          </p>
+
+          <div class="chiffres mt-3">
+            <div class="chiffre">
+              <b>24 h</b>
+              <span>délai de réponse ouvré</span>
+            </div>
+            <div class="chiffre">
+              <b>4</b>
+              <span>rendus offerts sur votre propre photo</span>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <% if (!sent) { %>
+        <div>
+          <% if (errors) { %>
+            <div class="avis" role="alert">
+              Le formulaire n’a pas pu être envoyé. Corrigez les champs signalés ci-dessous.
+            </div>
+          <% } %>
+
+          <form method="post" action="/contact" novalidate>
+            <input type="hidden" name="plan_id" value="<%= plan %>">
+
+            <div class="champ" <%= errors && errors.name ? 'data-erreur' : '' %>>
+              <label for="name">Votre nom</label>
+              <input id="name" name="name" type="text" required autocomplete="name"
+                     value="<%= values.name || '' %>">
+              <% if (errors && errors.name) { %><span class="erreur"><%= errors.name %></span><% } %>
+            </div>
+
+            <div class="champ" <%= errors && errors.email ? 'data-erreur' : '' %>>
+              <label for="email">Email professionnel</label>
+              <input id="email" name="email" type="email" required autocomplete="email"
+                     value="<%= values.email || '' %>">
+              <% if (errors && errors.email) { %><span class="erreur"><%= errors.email %></span><% } %>
+            </div>
+
+            <div class="champ">
+              <label for="company">Agence <span class="opt">— facultatif</span></label>
+              <input id="company" name="company" type="text" autocomplete="organization"
+                     value="<%= values.company || '' %>">
+            </div>
+
+            <div class="champ">
+              <label for="phone">Téléphone <span class="opt">— facultatif</span></label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel"
+                     value="<%= values.phone || '' %>">
+            </div>
+
+            <div class="champ">
+              <label for="volume">Biens publiés par mois</label>
+              <select id="volume" name="volume">
+                <option value="">Je ne sais pas encore</option>
+                <option value="1-10">1 à 10</option>
+                <option value="11-30">11 à 30</option>
+                <option value="31-80">31 à 80</option>
+                <option value="80+">Plus de 80</option>
+              </select>
+            </div>
+
+            <div class="champ">
+              <label for="message">Votre message <span class="opt">— facultatif</span></label>
+              <textarea id="message" name="message"
+                        placeholder="Logiciel utilisé, lien vers une annonce, question…"><%= values.message || '' %></textarea>
+            </div>
+
+            <!-- piège à robots : un humain ne voit pas ce champ -->
+            <div class="piege" aria-hidden="true">
+              <label for="website">Site web</label>
+              <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+
+            <button class="btn btn-or btn-lg" type="submit" style="width:100%">
+              Envoyer <span class="fleche">→</span>
+            </button>
+
+            <p class="doux" style="font-size:.82rem;margin-top:1rem">
+              Vos données servent uniquement à vous répondre.
+              Voir la <a href="/confidentialite">politique de confidentialité</a>.
+            </p>
+          </form>
+        </div>
+      <% } %>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

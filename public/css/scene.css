@@ -1,0 +1,131 @@
+/* =====================================================================
+   LA SCÈNE PARAMÉTRIQUE
+   Une seule maison en SVG. Tout — ciel, lumière, saison, météo — n'est
+   qu'un jeu de variables CSS. Changer d'ambiance = changer 16 nombres.
+   C'est exactement le principe du produit, rendu tangible avant l'IA.
+   ===================================================================== */
+
+/* @property permet de faire TRANSITIONNER des variables personnalisées.
+   Sans ça, le passage d'une ambiance à l'autre serait un saut brutal. */
+@property --sky-top     { syntax: '<color>'; inherits: true; initial-value: #5C9AC9; }
+@property --sky-bottom  { syntax: '<color>'; inherits: true; initial-value: #CFE4F2; }
+@property --light       { syntax: '<color>'; inherits: true; initial-value: #FFFBEF; }
+@property --wall        { syntax: '<color>'; inherits: true; initial-value: #F7F1E5; }
+@property --roof        { syntax: '<color>'; inherits: true; initial-value: #87513E; }
+@property --ground      { syntax: '<color>'; inherits: true; initial-value: #93AF76; }
+@property --foliage     { syntax: '<color>'; inherits: true; initial-value: #6B9155; }
+@property --foliage-alt { syntax: '<color>'; inherits: true; initial-value: #88AC6C; }
+@property --sun-x       { syntax: '<length>'; inherits: true; initial-value: 400px; }
+@property --sun-y       { syntax: '<length>'; inherits: true; initial-value: 90px; }
+@property --glow        { syntax: '<number>'; inherits: true; initial-value: 0.45; }
+@property --stars       { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --rain        { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --snow        { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --flakes      { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --fog         { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --blossom     { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --win-lit     { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+.scene-stage {
+  --dur: 1100ms;
+  --ease: cubic-bezier(.4, 0, .18, 1);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--sky-bottom);
+  transition:
+    --sky-top var(--dur) var(--ease), --sky-bottom var(--dur) var(--ease),
+    --light var(--dur) var(--ease), --wall var(--dur) var(--ease),
+    --roof var(--dur) var(--ease), --ground var(--dur) var(--ease),
+    --foliage var(--dur) var(--ease), --foliage-alt var(--dur) var(--ease),
+    --sun-x calc(var(--dur) * 1.3) var(--ease), --sun-y calc(var(--dur) * 1.3) var(--ease),
+    --glow var(--dur) var(--ease), --stars var(--dur) var(--ease),
+    --rain var(--dur) var(--ease), --snow calc(var(--dur) * 1.2) var(--ease),
+    --flakes var(--dur) var(--ease), --fog var(--dur) var(--ease),
+    --blossom var(--dur) var(--ease), --win-lit var(--dur) var(--ease);
+}
+
+.scene { display: block; width: 100%; height: 100%; }
+
+/* --- ciel ---------------------------------------------------------- */
+.sky-a { stop-color: var(--sky-top); }
+.sky-b { stop-color: var(--sky-bottom); }
+
+.stars circle { fill: #FFFFFF; }
+.stars { opacity: var(--stars); }
+.stars circle:nth-child(3n)   { animation: twinkle 4.2s ease-in-out infinite; }
+.stars circle:nth-child(3n+1) { animation: twinkle 5.6s ease-in-out infinite .8s; }
+@keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* --- astre --------------------------------------------------------- */
+.sun { transform: translate(var(--sun-x), var(--sun-y)); }
+.sun-core { fill: var(--light); }
+.sun-halo { opacity: var(--glow); }
+.halo-a { stop-color: var(--light); stop-opacity: .55; }
+.halo-b { stop-color: var(--light); stop-opacity: .16; }
+.halo-c { stop-color: var(--light); stop-opacity: 0; }
+
+/* --- terrain ------------------------------------------------------- */
+.hills     { fill: var(--foliage-alt); opacity: .55; }
+.treeline  { fill: var(--foliage); opacity: .5; }
+.ground    { fill: var(--ground); }
+.path      { fill: var(--ground); filter: brightness(.86); }
+
+/* --- maison -------------------------------------------------------- */
+.wall     { fill: var(--wall); }
+.roof     { fill: var(--roof); }
+.chimney  { fill: var(--roof); filter: brightness(.9); }
+.terrace  { fill: var(--wall); filter: brightness(.82); }
+.door     { fill: var(--roof); filter: brightness(.78); }
+.knob     { fill: var(--light); }
+.mullion  { stroke: var(--wall); stroke-width: 2.5; filter: brightness(.7); }
+
+.win-a { stop-color: var(--light); stop-opacity: calc(.15 + .85 * var(--win-lit)); }
+.win-b { stop-color: var(--sky-top); stop-opacity: calc(.85 - .7 * var(--win-lit)); }
+.win   { filter: drop-shadow(0 0 calc(9px * var(--win-lit)) var(--light)); }
+
+.spill { fill: var(--light); opacity: calc(.28 * var(--win-lit)); }
+
+/* --- végétation ---------------------------------------------------- */
+.trunk        { fill: var(--roof); filter: brightness(.7); }
+.canopy       { fill: var(--foliage); }
+.canopy.alt   { fill: var(--foliage-alt); }
+.blossom      { fill: #FFE7EE; opacity: var(--blossom); }
+
+/* --- couverture neigeuse ------------------------------------------- */
+.snowpack { fill: #FBFDFF; opacity: var(--snow); }
+
+/* --- précipitations ------------------------------------------------ */
+.rain   { opacity: var(--rain); }
+.rain line { stroke: #E8F0F6; stroke-width: 1.6; stroke-opacity: .6;
+             animation: fall 620ms linear infinite; }
+@keyframes fall { to { transform: translate(-115px, 500px); } }
+
+.flakes { opacity: var(--flakes); }
+.flakes circle { fill: #FFFFFF; fill-opacity: .9;
+                 animation: drift 7s linear infinite; }
+@keyframes drift {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(26px, 250px); }
+  100% { transform: translate(-14px, 500px); }
+}
+
+/* --- atmosphère ---------------------------------------------------- */
+.fog-a { stop-color: #FFFFFF; stop-opacity: 0; }
+.fog-b { stop-color: #EEF2F4; stop-opacity: .8; }
+.fog-c { stop-color: #FFFFFF; stop-opacity: .95; }
+.fog   { opacity: var(--fog); }
+
+.vignette {
+  fill: none;
+  /* un léger assombrissement des bords : la photo d'annonce, pas le dessin d'enfant */
+  stroke: rgba(0, 0, 0, .3);
+  stroke-width: 90;
+  filter: blur(38px);
+  opacity: .45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-stage { --dur: 1ms; }
+  .rain line, .flakes circle, .stars circle { animation: none; }
+}
