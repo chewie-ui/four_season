@@ -69,6 +69,7 @@ app.use((req, res, next) => {
   res.locals.path = req.path;
   res.locals.baseUrl = env.baseUrl;
   res.locals.year = new Date().getFullYear();
+  res.locals.indexable = env.indexable;
   next();
 });
 

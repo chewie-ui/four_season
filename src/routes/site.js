@@ -2,6 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 
+import env from '../config/env.js';
 import brand from '../config/brand.js';
 import { SCENES, GROUPS, DEMO_ORDER, sceneById, scenesByGroup } from '../config/scenes.js';
 import { saveLead } from '../services/leads.js';
@@ -119,6 +120,31 @@ router.post('/contact', contactLimiter, async (req, res, next) => {
     errors: null,
     values: {},
   });
+});
+
+/**
+ * robots.txt dynamique. Tant que SITE_INDEXABLE n'est pas vrai, on interdit
+ * tout : un site incomplet indexe par Google est tres long a faire retirer.
+ */
+router.get('/robots.txt', (req, res) => {
+  res.type('text/plain').set('Cache-Control', 'public, max-age=3600');
+
+  if (!env.indexable) {
+    return res.send('User-agent: *\nDisallow: /\n');
+  }
+
+  res.send(
+    [
+      'User-agent: *',
+      'Allow: /',
+      'Disallow: /api/',
+      'Disallow: /console',
+      'Disallow: /embed/',
+      '',
+      `Sitemap: ${env.baseUrl}/sitemap.xml`,
+      '',
+    ].join('\n')
+  );
 });
 
 router.get('/mentions-legales', (req, res) => {

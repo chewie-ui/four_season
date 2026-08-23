@@ -6,6 +6,7 @@
 <title><%= title %></title>
 <meta name="description" content="<%= typeof description !== 'undefined' && description ? description : brand.baseline %>">
 <meta name="theme-color" content="<%= brand.colors.nuit %>">
+<% if (!indexable) { %><meta name="robots" content="noindex, nofollow"><% } %>
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="<%= brand.name %>">

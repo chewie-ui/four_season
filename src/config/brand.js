@@ -6,7 +6,7 @@
 export const brand = {
   name: 'Four Season',
   legalName: 'Four Season SAS',
-  domain: 'fourseason.fr',
+  domain: 'restockdesk.com',
   tagline: 'La même maison. Toutes ses saisons.',
   baseline:
     'Vos photos de biens, régénérées automatiquement en hiver, en été, au coucher du soleil ou sous la pluie. Vos acheteurs se projettent enfin.',

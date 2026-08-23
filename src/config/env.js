@@ -34,6 +34,11 @@ export const env = {
     localPath: process.env.STORAGE_LOCAL_PATH || './storage',
   },
 
+  // Tant que les mentions legales ne sont pas remplies, le site ne doit pas
+  // etre indexe : une page incomplete referencee par Google est difficile
+  // a faire disparaitre ensuite.
+  indexable: bool(process.env.SITE_INDEXABLE, false),
+
   workerInline: bool(process.env.WORKER_INLINE, false),
   workerConcurrence: int(process.env.WORKER_CONCURRENCY, 4),
 
