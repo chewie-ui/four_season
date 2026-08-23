@@ -207,12 +207,28 @@ for (const page of ['legal', 'confidentialite']) {
   }
 }
 
+// robots.txt n'est plus un fichier statique : il est servi dynamiquement pour
+// suivre SITE_INDEXABLE. On vérifie donc la route, pas un fichier.
 try {
-  await access('public/robots.txt');
-  ajouter(AVERTIR, 'robots.txt présent', true, '');
+  const routes = await readFile(new URL('../routes/site.js', import.meta.url), 'utf8');
+  ajouter(
+    AVERTIR,
+    'robots.txt servi dynamiquement',
+    /router\.get\(\s*['"]\/robots\.txt['"]/.test(routes),
+    ''
+  );
 } catch {
-  ajouter(AVERTIR, 'robots.txt présent', false, '');
+  ajouter(AVERTIR, 'robots.txt servi dynamiquement', false, 'route introuvable');
 }
+
+ajouter(
+  env.indexable ? AVERTIR : BLOQUANT,
+  'indexation cohérente avec l’état des pages légales',
+  true,
+  env.indexable
+    ? 'SITE_INDEXABLE=true : le site est ouvert à Google — les pages légales doivent être complètes'
+    : 'SITE_INDEXABLE=false : noindex + robots Disallow, le site reste invisible pour Google'
+);
 
 /* ------------------------------------------------------------- rapport --- */
 

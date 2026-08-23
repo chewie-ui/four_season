@@ -1,8 +1,8 @@
 {
-  "name": "aurelo",
+  "name": "four-season",
   "version": "0.1.0",
   "private": true,
-  "description": "Aurelo — visualisez chaque bien immobilier sous toutes ses lumieres, saisons et meteos.",
+  "description": "Four Season — les photos d'annonces immobilieres regenerees dans toutes les saisons, meteos et heures.",
   "type": "module",
   "engines": {
     "node": ">=20"
