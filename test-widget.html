@@ -7,12 +7,27 @@
 <style>
   /* Style volontairement quelconque : celui d'un site d'agence ordinaire.
      Aucune ligne de Four Season ici — c'est tout l'intérêt du test. */
-  body { max-width: 680px; margin: 40px auto; padding: 0 20px;
+  body { max-width: 720px; margin: 40px auto; padding: 0 20px;
          font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
          color: #1f2733; }
   h1 { font-size: 22px; margin-bottom: 4px; }
   .lieu { color: #8a93a1; font-size: 14px; margin: 0 0 18px; }
-  img { width: 100%; height: auto; border-radius: 6px; display: block; background: #eef1f4; }
+  img#photo { width: 100%; height: auto; border-radius: 6px; display: block; background: #eef1f4; }
+
+  .banc { background: #f4f6f8; border: 1px solid #e2e7ec; border-radius: 8px;
+          padding: 14px 16px; margin-bottom: 26px; }
+  .banc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
+             color: #6b7684; margin: 0 0 10px; }
+  .banc .ligne { display: flex; gap: 8px; flex-wrap: wrap; }
+  .banc input { flex: 1; min-width: 260px; padding: 9px 12px; font: inherit; font-size: 14px;
+                border: 1px solid #cfd6dd; border-radius: 6px; }
+  .banc button { padding: 9px 16px; font: inherit; font-size: 14px; font-weight: 600;
+                 background: #0B1220; color: #F6F1E8; border: 0; border-radius: 6px; cursor: pointer; }
+  .banc button:hover { background: #1b2a44; }
+  .banc .exemples { margin-top: 9px; font-size: 13px; color: #6b7684; }
+  .banc .exemples a { color: #a0691e; cursor: pointer; }
+  .banc .aide { margin-top: 10px; font-size: 12.5px; color: #7d8794; line-height: 1.5; }
+
   .note { margin-top: 28px; padding: 12px 14px; border-left: 3px solid #E0A458;
           background: #fdf7ee; font-size: 13px; color: #6b5636; }
   code { background: #eef1f4; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
@@ -20,22 +35,32 @@
 </head>
 <body>
 
+  <!-- ================= banc d'essai — n'existe pas sur un vrai site ========= -->
+  <div class="banc">
+    <h2>Banc d'essai</h2>
+    <div class="ligne">
+      <input id="url" type="url" placeholder="Collez l'URL publique d'une photo…">
+      <button id="charger">Charger</button>
+    </div>
+    <p class="exemples">
+      Exemples : <a data-ex="https://restockdesk.com/img/exemple-bien.jpg">illustration vectorielle</a>
+    </p>
+    <p class="aide">
+      L'URL doit être <b>publique</b> : c'est le serveur Four Season qui télécharge
+      la photo pour la régénérer. Une image sur votre disque ou sur votre
+      <code>localhost</code> lui est invisible.<br>
+      Pour obtenir une URL publique depuis une vraie photo : téléversez-la sur
+      <a href="https://restockdesk.com/console" target="_blank">la console</a>,
+      puis copiez l'adresse de la photo d'origine affichée.
+    </p>
+  </div>
+
+  <!-- ================= la page d'annonce, telle qu'elle serait ============= -->
   <h1>Maison de famille, 6 pièces</h1>
   <p class="lieu">Annecy-le-Vieux · Réf. 2417 · <b>745 000 €</b></p>
 
-  <!--
-    Deux exigences pour que le widget fonctionne :
-
-    1. Cette page doit être SERVIE PAR UN SERVEUR, pas ouverte en file://
-       Un fichier local n'a pas de domaine, donc rien à autoriser.
-       Lancez :  npx serve .   puis ouvrez http://localhost:3000/test-widget.html
-
-    2. L'attribut src doit être une URL PUBLIQUE. C'est le serveur Four Season
-       qui télécharge cette image pour la régénérer — une image sur votre
-       disque ou sur votre localhost lui est invisible.
-       Ici on pointe une image publique du serveur de production.
-  -->
-  <img src="https://restockdesk.com/img/exemple-bien.jpg"
+  <img id="photo"
+       src="https://restockdesk.com/img/exemple-bien.jpg"
        alt="Façade sud de la maison"
        data-fourseason
        data-ambiances="hiver,coucher,heure-bleue,pluie">
@@ -46,16 +71,46 @@
   </p>
 
   <div class="note">
-    <b>Comment lire ce test.</b> Les vignettes sous la photo sont ajoutées par
-    le widget. Un clic sur une ambiance déjà calculée est <b>instantané</b> ;
-    une ambiance jamais générée prend une quinzaine de secondes, puis reste
-    en cache pour tous les visiteurs suivants.
+    <b>Comment lire ce test.</b> Une ambiance déjà calculée s'affiche
+    <b>instantanément</b> — c'est le cache. Une ambiance jamais générée sur
+    cette photo prend une quinzaine de secondes, puis reste gratuite pour tous
+    les visiteurs suivants.
     <br><br>
-    Si un message d'erreur s'affiche à la place, il dit précisément ce qui
-    manque — domaine non autorisé, clé absente, ou crédits épuisés.
+    Cette page doit être servie par un serveur (<code>npx serve .</code>).
+    Ouverte en <code>file://</code>, elle envoie <code>Origin: null</code> et
+    sera toujours refusée : un fichier local n'a pas de domaine à autoriser.
   </div>
 
   <script src="https://restockdesk.com/fourseason.js"
           data-cle="pk_live_vvZfQk1Ld7Xo1I4WdW_4ionmWcVlZm_w" defer></script>
+
+  <script>
+    // Rééquiper le widget après un changement de photo.
+    // Le widget marque chaque image traitée (data-fourseason-pret) pour ne pas
+    // la traiter deux fois : il faut retirer cette marque et l'ancien sélecteur.
+    function rechargerPhoto(url) {
+      if (!url) return;
+      var img = document.getElementById('photo');
+      var ancien = document.querySelector('.fourseason-widget');
+      if (ancien) ancien.remove();
+      delete img.dataset.fourseasonPret;
+      img.removeAttribute('srcset');
+      img.src = url;
+      if (window.FourSeason) window.FourSeason.equiper(img);
+    }
+
+    document.getElementById('charger').addEventListener('click', function () {
+      rechargerPhoto(document.getElementById('url').value.trim());
+    });
+    document.getElementById('url').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') rechargerPhoto(this.value.trim());
+    });
+    document.querySelectorAll('[data-ex]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        document.getElementById('url').value = this.dataset.ex;
+        rechargerPhoto(this.dataset.ex);
+      });
+    });
+  </script>
 </body>
 </html>
