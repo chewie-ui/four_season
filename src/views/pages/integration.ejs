@@ -69,10 +69,10 @@
           <div id="ex-js" role="tabpanel" aria-labelledby="t-js" hidden>
             <pre class="pre-code"><code><span class="c">// annonces chargées en AJAX : le widget les détecte seul,</span>
 <span class="c">// mais vous pouvez aussi équiper une image à la main</span>
-<span class="t">Four Season</span>.<span class="a">equiper</span>(<span class="t">document</span>.<span class="a">querySelector</span>(<span class="s">'#photo-principale'</span>));
+<span class="t">FourSeason</span>.<span class="a">equiper</span>(<span class="t">document</span>.<span class="a">querySelector</span>(<span class="s">'#photo-principale'</span>));
 
 <span class="c">// ou relancer un balayage complet</span>
-<span class="t">Four Season</span>.<span class="a">balayer</span>();</code></pre>
+<span class="t">FourSeason</span>.<span class="a">balayer</span>();</code></pre>
           </div>
         </div>
 
@@ -119,7 +119,7 @@
   method: <span class="s">'POST'</span>,
   headers: {
     <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>,
-    <span class="s">'Authorization'</span>: <span class="s">`Bearer ${process.env.AURELO_SECRET}`</span>
+    <span class="s">'Authorization'</span>: <span class="s">`Bearer ${process.env.FOUR_SEASON_SECRET}`</span>
   },
   body: <span class="t">JSON</span>.<span class="a">stringify</span>({
     image: <span class="s">'https://mon-agence.fr/photos/villa.jpg'</span>,
@@ -129,7 +129,7 @@
 });
 
 <span class="t">const</span> { variantes } = <span class="t">await</span> rep.<span class="a">json</span>();
-<span class="c">// → [{ scene: 'hiver', url: 'https://cdn.fourseason.fr/…' }, …]</span></code></pre>
+<span class="c">// → [{ scene: 'hiver', url: 'https://cdn.restockdesk.com/…' }, …]</span></code></pre>
         </div>
 
         <div>

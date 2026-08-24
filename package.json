@@ -15,7 +15,8 @@
     "worker": "node src/worker.js",
     "gemini:test": "node src/tools/test-gemini.js",
     "gemini:models": "node src/tools/list-models.js",
-    "preflight": "node src/tools/preflight.js"
+    "preflight": "node src/tools/preflight.js",
+    "cles": "node src/tools/cles.js"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
