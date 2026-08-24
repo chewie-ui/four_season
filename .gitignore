@@ -7,3 +7,5 @@ storage/
 .env.production
 logs/
 deploy/*.local.conf
+
+# page de test locale du widget
