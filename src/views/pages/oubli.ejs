@@ -1,0 +1,22 @@
+<%- include('../partials/auth-debut') %>
+<% if (envoye) { %>
+  <h1 style="font-size:2rem;margin-bottom:.35em">V&eacute;rifiez vos emails</h1>
+  <p class="chapo">
+    Si un compte existe avec cette adresse, un lien de r&eacute;initialisation vient d&rsquo;y &ecirc;tre envoy&eacute;.
+    Il expire dans une heure.
+  </p>
+  <a class="btn btn-vide mt-2" href="/connexion">Retour &agrave; la connexion</a>
+<% } else { %>
+  <h1 style="font-size:2rem;margin-bottom:.35em">Mot de passe oubli&eacute;</h1>
+  <p class="doux" style="font-size:.95rem;margin-bottom:2rem">
+    Indiquez votre adresse, nous vous envoyons un lien pour en choisir un nouveau.
+  </p>
+  <form method="post" action="/mot-de-passe-oublie">
+    <div class="champ">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required autocomplete="email">
+    </div>
+    <button class="btn btn-or btn-lg" type="submit" style="width:100%">Envoyer le lien</button>
+  </form>
+<% } %>
+<%- include('../partials/auth-fin') %>

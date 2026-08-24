@@ -1,0 +1,227 @@
+<%- include('../partials/head') %>
+<link rel="stylesheet" href="/css/console.css">
+
+<header class="c-entete">
+  <a class="c-marque" href="/console">
+    <img src="/img/logo.svg" alt="" width="28" height="28">
+    <%= brand.name %> <span>console</span>
+  </a>
+  <div class="c-entete-droite">
+    <a class="btn btn-vide" href="/console" style="padding:.5em 1em;font-size:.85rem">Mes biens</a>
+    <span class="c-credits"><%= credits %> crédits</span>
+    <form method="post" action="/deconnexion" style="display:inline">
+      <button class="btn btn-vide" type="submit" style="padding:.5em 1em;font-size:.85rem">Quitter</button>
+    </form>
+  </div>
+</header>
+
+<main id="principal" class="c-corps">
+
+  <% if (paiement === 'succes') { %>
+    <div class="avis" style="margin:0">
+      <b>Paiement confirmé.</b> Vos crédits sont ajoutés dès que Stripe nous
+      notifie l'encaissement — quelques secondes en général. Rechargez la page
+      s'ils ne sont pas encore visibles.
+    </div>
+  <% } %>
+
+  <% if (message) { %>
+    <div class="avis" style="margin:0<%= message.type === 'erreur' ? ';border-color:#D9534F;background:rgba(217,83,79,.09)' : '' %>">
+      <%= message.texte %>
+    </div>
+  <% } %>
+
+  <% if (nouvelleCle) { %>
+    <section class="c-panneau" style="border-color:var(--or)">
+      <div class="c-panneau-titre">
+        <h2>Votre nouvelle clé <%= nouvelleCle.kind === 'secret' ? 'secrète' : 'publique' %></h2>
+      </div>
+      <p class="doux" style="font-size:.9rem;margin-bottom:1rem">
+        <b>Copiez-la maintenant.</b> Elle est stockée hachée — elle ne
+        réapparaîtra jamais, même pour nous.
+      </p>
+      <pre class="pre-code" style="margin:0;user-select:all"><code><%= nouvelleCle.valeur %></code></pre>
+    </section>
+  <% } %>
+
+  <!-- ==================================================== LES DOMAINES -->
+  <section class="c-panneau">
+    <div class="c-panneau-titre">
+      <span class="c-num">1</span>
+      <h2>Domaines autorisés</h2>
+    </div>
+    <p class="doux" style="font-size:.92rem;margin-bottom:1.2rem">
+      Votre clé publique n'est acceptée que depuis ces domaines. C'est le seul
+      rempart : la clé, elle, est visible dans le HTML de vos pages.
+      <b>Un domaine absent d'ici fait refuser le widget.</b>
+    </p>
+
+    <form method="post" action="/console/compte/domaines" class="c-lancer" style="margin-bottom:1.2rem">
+      <input type="text" name="domaine" required placeholder="mon-agence.fr"
+             style="flex:1;min-width:220px;padding:.7rem .9rem;background:var(--nuit);color:var(--texte);
+                    border:1px solid var(--trait);border-radius:3px;font:inherit;font-size:.95rem">
+      <button class="btn btn-or" type="submit">Autoriser</button>
+    </form>
+
+    <% if (domaines.length) { %>
+      <div class="c-cases" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))">
+        <% domaines.forEach(function (d) { %>
+          <div class="c-case" style="justify-content:space-between;cursor:default">
+            <code style="font-size:.9rem"><%= d.domain %></code>
+            <form method="post" action="/console/compte/domaines/<%= d.id %>/supprimer">
+              <button type="submit" class="c-lien" style="font-size:.8rem;color:#FF9B96">retirer</button>
+            </form>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p class="doux" style="font-size:.9rem">
+        Aucun domaine déclaré — toute clé publique sera refusée.
+      </p>
+    <% } %>
+
+    <p class="c-aide">
+      Le joker fonctionne : <code>*.mon-agence.fr</code> couvre tous les
+      sous-domaines. Inutile de préciser le port ou <code>https://</code>.
+    </p>
+  </section>
+
+  <!-- ========================================================= LES CLÉS -->
+  <section class="c-panneau">
+    <div class="c-panneau-titre">
+      <span class="c-num">2</span>
+      <h2>Clés d'API</h2>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+        <thead>
+          <tr style="text-align:left;color:var(--texte-doux);font-size:.78rem;
+                     text-transform:uppercase;letter-spacing:.08em">
+            <th style="padding:.5rem .6rem .5rem 0">Clé</th>
+            <th style="padding:.5rem .6rem">Type</th>
+            <th style="padding:.5rem .6rem">Dernier usage</th>
+            <th style="padding:.5rem 0"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cles.forEach(function (c) { %>
+            <tr style="border-top:1px solid var(--trait)<%= c.revoked_at ? ';opacity:.45' : '' %>">
+              <td style="padding:.7rem .6rem .7rem 0">
+                <code><%= c.key_prefix %>…</code>
+                <% if (c.label) { %><br><span class="doux" style="font-size:.8rem"><%= c.label %></span><% } %>
+              </td>
+              <td style="padding:.7rem .6rem"><%= c.kind === 'public' ? 'publique' : 'secrète' %></td>
+              <td style="padding:.7rem .6rem" class="doux">
+                <%= c.revoked_at ? 'révoquée' : (c.last_used_at ? new Date(c.last_used_at).toLocaleString('fr-FR') : 'jamais') %>
+              </td>
+              <td style="padding:.7rem 0;text-align:right">
+                <% if (!c.revoked_at) { %>
+                  <form method="post" action="/console/compte/cles/<%= c.id %>/revoquer">
+                    <button type="submit" class="c-lien" style="font-size:.82rem;color:#FF9B96">révoquer</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="c-lancer" style="margin-top:1.4rem">
+      <form method="post" action="/console/compte/cles" style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <input type="hidden" name="type" value="public">
+        <input type="text" name="label" placeholder="Étiquette (ex. site vitrine)"
+               style="padding:.6rem .8rem;background:var(--nuit);color:var(--texte);
+                      border:1px solid var(--trait);border-radius:3px;font:inherit;font-size:.88rem">
+        <button class="btn btn-vide" type="submit">Nouvelle clé publique</button>
+      </form>
+      <form method="post" action="/console/compte/cles">
+        <input type="hidden" name="type" value="secret">
+        <button class="btn btn-vide" type="submit">Nouvelle clé secrète</button>
+      </form>
+    </div>
+
+    <p class="c-aide">
+      Révoquer est immédiat et sans retour. Créez la nouvelle clé, déployez-la,
+      <b>puis</b> révoquez l'ancienne — dans cet ordre, votre site ne tombe jamais.
+    </p>
+  </section>
+
+  <!-- ==================================================== ABONNEMENT -->
+  <section class="c-panneau">
+    <div class="c-panneau-titre">
+      <span class="c-num">3</span>
+      <h2>Offre et facturation</h2>
+    </div>
+
+    <div class="chiffres" style="margin-bottom:1.6rem">
+      <div class="chiffre">
+        <b><%= credits %></b>
+        <span>crédits disponibles</span>
+      </div>
+      <div class="chiffre">
+        <b style="font-size:1.6rem;font-family:var(--sans)"><%= agence.plan_id %></b>
+        <span>
+          <%= agence.abonnement_statut === 'actif' ? 'abonnement actif'
+             : agence.abonnement_statut === 'en_retard' ? 'paiement en retard'
+             : agence.abonnement_statut === 'annule' ? 'abonnement annulé'
+             : 'sans abonnement' %>
+        </span>
+      </div>
+      <div class="chiffre">
+        <b style="font-size:1.6rem;font-family:var(--sans)"><%= agence.watermark ? 'Oui' : 'Non' %></b>
+        <span>filigrane sur les rendus</span>
+      </div>
+    </div>
+
+    <% if (!paiementActif) { %>
+      <div class="avis">
+        Le paiement en ligne n'est pas encore activé sur ce serveur.
+        <a href="/contact">Écrivez-nous</a> pour souscrire.
+      </div>
+    <% } else if (agence.abonnement_statut === 'actif') { %>
+      <form method="post" action="/paiement/portail">
+        <button class="btn btn-vide" type="submit">Gérer mon abonnement et mes factures</button>
+      </form>
+      <p class="c-aide">Carte bancaire, factures et résiliation se gèrent dans le portail sécurisé de Stripe.</p>
+    <% } else { %>
+      <div class="offres">
+        <% brand.plans.filter(p => p.price).forEach(function (p) { %>
+          <div class="offre <%= p.highlight ? 'phare' : '' %>">
+            <h3><%= p.name %></h3>
+            <div class="offre-prix"><%= p.price %> €<small>/ <%= p.period %></small></div>
+            <p class="doux" style="font-size:.9rem;margin:0"><%= p.credits %> ambiances par mois, sans filigrane.</p>
+            <form method="post" action="/paiement/souscrire" style="margin-top:auto">
+              <input type="hidden" name="offre" value="<%= p.id %>">
+              <button class="btn <%= p.highlight ? 'btn-or' : 'btn-vide' %>" type="submit" style="width:100%">
+                Souscrire
+              </button>
+            </form>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <% if (factures.length) { %>
+      <h4 style="margin-top:2rem">Derniers encaissements</h4>
+      <div style="overflow-x:auto;margin-top:.8rem">
+        <table style="width:100%;border-collapse:collapse;font-size:.88rem">
+          <tbody>
+            <% factures.forEach(function (f) { %>
+              <tr style="border-top:1px solid var(--trait)">
+                <td style="padding:.55rem 0" class="doux"><%= new Date(f.created_at).toLocaleDateString('fr-FR') %></td>
+                <td style="padding:.55rem"><%= f.plan_id %></td>
+                <td style="padding:.55rem">+<%= f.credits %> crédits</td>
+                <td style="padding:.55rem 0;text-align:right"><%= (f.montant_cents / 100).toFixed(2) %> <%= f.devise %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+</main>
+
+</body>
+</html>

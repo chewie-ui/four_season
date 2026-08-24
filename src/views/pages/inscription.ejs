@@ -1,0 +1,60 @@
+<%- include('../partials/auth-debut', { large: true }) %>
+
+<h1 style="font-size:2rem;margin-bottom:.35em">Ouvrir un compte</h1>
+<p class="doux" style="font-size:.96rem;margin-bottom:2rem">
+  Vos clés sont générées immédiatement, et vous repartez avec
+  <b><%= brand.plans[0].credits %> ambiances offertes</b>. Aucune carte demandée.
+</p>
+
+<form method="post" action="/inscription" novalidate>
+  <div class="champ" <%= erreurs && erreurs.agence ? 'data-erreur' : '' %>>
+    <label for="agence">Nom de votre agence</label>
+    <input id="agence" name="agence" type="text" required autocomplete="organization"
+           value="<%= valeurs.agence || '' %>" placeholder="Agence Durand &amp; Fils">
+    <% if (erreurs && erreurs.agence) { %><span class="erreur"><%= erreurs.agence %></span><% } %>
+  </div>
+
+  <div class="champ">
+    <label for="nom">Votre nom <span class="opt">— facultatif</span></label>
+    <input id="nom" name="nom" type="text" autocomplete="name" value="<%= valeurs.nom || '' %>">
+  </div>
+
+  <div class="champ" <%= erreurs && erreurs.email ? 'data-erreur' : '' %>>
+    <label for="email">Email professionnel</label>
+    <input id="email" name="email" type="email" required autocomplete="email"
+           value="<%= valeurs.email || '' %>">
+    <% if (erreurs && erreurs.email) { %><span class="erreur"><%= erreurs.email %></span><% } %>
+  </div>
+
+  <div class="champ" <%= erreurs && erreurs.motdepasse ? 'data-erreur' : '' %>>
+    <label for="motdepasse">Mot de passe</label>
+    <input id="motdepasse" name="motdepasse" type="password" required autocomplete="new-password"
+           minlength="10">
+    <span class="doux" style="font-size:.8rem">Au moins 10 caractères, avec une lettre et un chiffre.</span>
+    <% if (erreurs && erreurs.motdepasse) { %><span class="erreur"><%= erreurs.motdepasse %></span><% } %>
+  </div>
+
+  <label style="display:flex;gap:.6rem;align-items:flex-start;margin:1.4rem 0;font-size:.88rem;cursor:pointer">
+    <input type="checkbox" name="cgu" value="on" required style="margin-top:.25rem">
+    <span class="doux">
+      J'accepte que les photos transmises soient traitées par Google Gemini pour la génération,
+      et j'ai lu la <a href="/confidentialite">politique de confidentialité</a>.
+    </span>
+  </label>
+  <% if (erreurs && erreurs.cgu) { %><span class="erreur"><%= erreurs.cgu %></span><% } %>
+
+  <div class="piege" aria-hidden="true">
+    <label for="website">Site web</label>
+    <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+  </div>
+
+  <button class="btn btn-or btn-lg" type="submit" style="width:100%">
+    Créer mon compte <span class="fleche">→</span>
+  </button>
+</form>
+
+<p class="doux" style="font-size:.9rem;margin-top:1.6rem;text-align:center">
+  Déjà un compte ? <a href="/connexion">Se connecter</a>
+</p>
+
+<%- include('../partials/auth-fin') %>

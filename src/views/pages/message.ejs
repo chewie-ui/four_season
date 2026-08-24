@@ -1,0 +1,7 @@
+<%- include('../partials/auth-debut') %>
+<h1 style="font-size:1.9rem;margin-bottom:.35em"><%= titre %></h1>
+<p class="chapo"><%= texte %></p>
+<% if (typeof lien !== 'undefined' && lien) { %>
+  <a class="btn btn-or btn-lg mt-2" href="<%= lien.href %>"><%= lien.texte %></a>
+<% } %>
+<%- include('../partials/auth-fin') %>

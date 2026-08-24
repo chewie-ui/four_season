@@ -1,0 +1,37 @@
+<%- include('../partials/auth-debut') %>
+
+<h1 style="font-size:2rem;margin-bottom:.35em">Connexion</h1>
+<p class="doux" style="font-size:.95rem;margin-bottom:2rem">
+  Accédez à votre console, vos clés et vos biens.
+</p>
+
+<% if (erreur) { %>
+  <div class="avis" role="alert" style="border-color:#D9534F;background:rgba(217,83,79,.09)">
+    <%= erreur %>
+  </div>
+<% } %>
+<% if (typeof query !== 'undefined') { } %>
+
+<form method="post" action="/connexion" novalidate>
+  <div class="champ">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" required autocomplete="email"
+           value="<%= valeurs.email || '' %>">
+  </div>
+  <div class="champ">
+    <label for="motdepasse">Mot de passe</label>
+    <input id="motdepasse" name="motdepasse" type="password" required autocomplete="current-password">
+  </div>
+  <button class="btn btn-or btn-lg" type="submit" style="width:100%">
+    Se connecter <span class="fleche">&rarr;</span>
+  </button>
+</form>
+
+<p class="doux" style="font-size:.88rem;margin-top:1.4rem;text-align:center">
+  <a href="/mot-de-passe-oublie">Mot de passe oubli&eacute; ?</a>
+</p>
+<p class="doux" style="font-size:.9rem;margin-top:.6rem;text-align:center">
+  Pas encore de compte ? <a href="/inscription">En cr&eacute;er un</a>
+</p>
+
+<%- include('../partials/auth-fin') %>

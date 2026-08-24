@@ -1,0 +1,14 @@
+<%- include('../partials/auth-debut') %>
+<% if (ok) { %>
+  <h1 style="font-size:2rem;margin-bottom:.35em">Adresse confirm&eacute;e</h1>
+  <p class="chapo">Votre compte est pleinement actif. Bonne g&eacute;n&eacute;ration.</p>
+  <a class="btn btn-or btn-lg mt-2" href="/console">Ouvrir ma console <span class="fleche">&rarr;</span></a>
+<% } else { %>
+  <h1 style="font-size:2rem;margin-bottom:.35em">Lien invalide</h1>
+  <p class="chapo">
+    Ce lien a d&eacute;j&agrave; servi, ou il est p&eacute;rim&eacute;. Si votre compte fonctionne d&eacute;j&agrave;,
+    il n&rsquo;y a rien &agrave; faire.
+  </p>
+  <a class="btn btn-vide mt-2" href="/console">Aller &agrave; ma console</a>
+<% } %>
+<%- include('../partials/auth-fin') %>

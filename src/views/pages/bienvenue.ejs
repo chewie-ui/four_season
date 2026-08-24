@@ -1,0 +1,52 @@
+<%- include('../partials/auth-debut', { large: true }) %>
+
+<h1 style="font-size:2rem;margin-bottom:.35em">Bienvenue, <%= agence %></h1>
+<p class="chapo" style="margin-bottom:2rem">
+  Votre compte est ouvert avec <b><%= credits %> ambiances offertes</b>.
+  Voici vos deux clés.
+</p>
+
+<div class="avis" style="border-color:var(--alerte);background:rgba(217,83,79,.09);margin-bottom:2rem">
+  <b>Copiez-les maintenant.</b> Elles sont stockées hachées : cette page est
+  le seul endroit où elles apparaîtront en clair, y compris pour nous.
+</div>
+
+<div style="border:1px solid var(--trait);border-radius:4px;padding:1.3rem;margin-bottom:1rem">
+  <p class="etiquette" style="margin-bottom:.7rem">Clé publique</p>
+  <p class="doux" style="font-size:.88rem;margin-bottom:.8rem">
+    Se pose en clair dans le HTML de votre site. C'est sa nature : ce qui la
+    protège, c'est la liste de vos domaines autorisés, pas le secret.
+  </p>
+  <pre class="pre-code" style="margin:0;user-select:all"><code><%= clePublique %></code></pre>
+</div>
+
+<div style="border:1px solid var(--or);border-radius:4px;padding:1.3rem;margin-bottom:2rem">
+  <p class="etiquette" style="margin-bottom:.7rem">Clé secrète</p>
+  <p class="doux" style="font-size:.88rem;margin-bottom:.8rem">
+    Serveur à serveur uniquement. <b>Jamais dans une page web</b>, jamais dans
+    une capture d'écran : elle donne un accès complet à votre compte.
+  </p>
+  <pre class="pre-code" style="margin:0;user-select:all"><code><%= cleSecrete %></code></pre>
+</div>
+
+<h3 style="font-size:1.15rem">Vos deux prochaines minutes</h3>
+<ol class="doux" style="font-size:.94rem;padding-left:1.2rem;line-height:1.9">
+  <li><b>Déclarez votre domaine</b> — sans lui, la clé publique sera refusée partout.</li>
+  <li>Téléversez une photo de bien et générez vos premières ambiances.</li>
+  <li>Copiez le code d'intégration généré pour ce bien, collez-le sur votre annonce.</li>
+</ol>
+
+<div class="pile mt-3">
+  <a class="btn btn-or btn-lg" href="/console/compte">Déclarer mon domaine <span class="fleche">→</span></a>
+  <a class="btn btn-vide btn-lg" href="/console">Aller à la console</a>
+</div>
+
+<% if (!emailEnvoye) { %>
+  <p class="doux" style="font-size:.82rem;margin-top:2rem;border-top:1px solid var(--trait);padding-top:1rem">
+    L'envoi d'emails n'est pas encore configuré sur ce serveur : le lien de
+    confirmation destiné à <%= email %> a été écrit dans les journaux
+    (<code>pm2 logs fs-web</code>) au lieu d'être envoyé.
+  </p>
+<% } %>
+
+<%- include('../partials/auth-fin') %>

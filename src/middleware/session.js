@@ -20,9 +20,14 @@ const DUREE_MS = 12 * 60 * 60 * 1000; // 12 h
 const signer = (charge) =>
   createHmac('sha256', env.sessionSecret).update(charge).digest('base64url');
 
-function fabriquer(agencyId) {
+function fabriquer(agencyId, userId = null) {
   const charge = Buffer.from(
-    JSON.stringify({ a: agencyId, exp: Date.now() + DUREE_MS, n: randomBytes(6).toString('base64url') })
+    JSON.stringify({
+      a: agencyId,
+      u: userId,
+      exp: Date.now() + DUREE_MS,
+      n: randomBytes(6).toString('base64url'),
+    })
   ).toString('base64url');
   return `${charge}.${signer(charge)}`;
 }
@@ -40,7 +45,7 @@ function lire(jeton) {
   try {
     const data = JSON.parse(Buffer.from(charge, 'base64url').toString('utf8'));
     if (!data.exp || data.exp < Date.now()) return null;
-    return { agencyId: Number(data.a) };
+    return { agencyId: Number(data.a), userId: data.u ? Number(data.u) : null };
   } catch {
     return null;
   }
@@ -56,10 +61,8 @@ export function session(req, res, next) {
 
   req.session = trouve ? lire(decodeURIComponent(trouve.slice(NOM.length + 1))) : null;
 
-  res.ouvrirSession = (agencyId) => {
-    res.cookie
-      ? res.cookie(NOM, fabriquer(agencyId), cookieOptions())
-      : res.setHeader('Set-Cookie', serialiser(NOM, fabriquer(agencyId), cookieOptions()));
+  res.ouvrirSession = (agencyId, userId = null) => {
+    res.setHeader('Set-Cookie', serialiser(NOM, fabriquer(agencyId, userId), cookieOptions()));
   };
   res.fermerSession = () => {
     res.setHeader('Set-Cookie', serialiser(NOM, '', { ...cookieOptions(), maxAge: 0 }));

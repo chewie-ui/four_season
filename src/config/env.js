@@ -37,6 +37,24 @@ export const env = {
     },
   },
 
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || '',
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+  },
+
+  // Envoi des emails (verification d'adresse, mot de passe oublie).
+  // Sans SMTP configure, les liens sont ecrits dans les journaux du serveur :
+  // le service reste utilisable en interne sans dependre d'un fournisseur.
+  smtp: {
+    host: process.env.SMTP_HOST || '',
+    port: int(process.env.SMTP_PORT, 587),
+    user: process.env.SMTP_USER || '',
+    password: process.env.SMTP_PASSWORD || '',
+    from: process.env.SMTP_FROM || '',
+    get configured() { return Boolean(this.host && this.user); },
+  },
+
   storage: {
     driver: process.env.STORAGE_DRIVER || 'local',
     localPath: process.env.STORAGE_LOCAL_PATH || './storage',

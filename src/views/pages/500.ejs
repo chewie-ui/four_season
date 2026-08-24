@@ -12,5 +12,10 @@
       </div>
     </div>
   </section>
+  <% if (typeof detail !== 'undefined' && detail) { %>
+    <div class="enveloppe">
+      <pre class="pre-code" style="white-space:pre-wrap;font-size:.78rem;max-width:100%"><%= detail %></pre>
+    </div>
+  <% } %>
 </main>
 <%- include('../partials/footer') %>

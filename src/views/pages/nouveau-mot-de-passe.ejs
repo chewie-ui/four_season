@@ -1,0 +1,15 @@
+<%- include('../partials/auth-debut') %>
+<h1 style="font-size:2rem;margin-bottom:.35em">Nouveau mot de passe</h1>
+<% if (erreur) { %>
+  <div class="avis" role="alert" style="border-color:#D9534F;background:rgba(217,83,79,.09)"><%= erreur %></div>
+<% } %>
+<form method="post" action="/nouveau-mot-de-passe">
+  <input type="hidden" name="jeton" value="<%= jeton %>">
+  <div class="champ">
+    <label for="motdepasse">Mot de passe</label>
+    <input id="motdepasse" name="motdepasse" type="password" required autocomplete="new-password" minlength="10">
+    <span class="doux" style="font-size:.8rem">Au moins 10 caract&egrave;res, avec une lettre et un chiffre.</span>
+  </div>
+  <button class="btn btn-or btn-lg" type="submit" style="width:100%">Enregistrer</button>
+</form>
+<%- include('../partials/auth-fin') %>

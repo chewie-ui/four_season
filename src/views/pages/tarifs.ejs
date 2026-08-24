@@ -29,7 +29,7 @@
             <ul>
               <% p.features.forEach(function (f) { %><li><span><%= f %></span></li><% }); %>
             </ul>
-            <a class="btn <%= p.highlight ? 'btn-or' : 'btn-vide' %>" href="/contact?offre=<%= p.id %>">
+            <a class="btn <%= p.highlight ? 'btn-or' : 'btn-vide' %>" href="<%= p.price === null ? '/contact?offre=' + p.id : '/inscription' %>">
               <%= p.cta %>
             </a>
           </div>
