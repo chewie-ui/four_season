@@ -4,13 +4,13 @@
  * (+ public/img/logo.svg). Tout le site lit ces valeurs.
  */
 export const brand = {
-  name: 'Four Season',
-  legalName: 'Four Season SAS',
+  name: 'Four Seasons',
+  legalName: 'Four Seasons SAS',
   domain: 'restockdesk.com',
   tagline: 'La même maison. Toutes ses saisons.',
   baseline:
     'Vos photos de biens, régénérées automatiquement en hiver, en été, au coucher du soleil ou sous la pluie. Vos acheteurs se projettent enfin.',
-  email: 'contact@fourseason.fr',
+  email: 'contact@restockdesk.com',
   phone: '+33 6 00 00 00 00',
 
   /**
@@ -51,7 +51,7 @@ export const brand = {
         '15 ambiances offertes',
         'Toutes les saisons et heures',
         'Widget à intégrer',
-        'Filigrane Four Season',
+        'Filigrane Four Seasons',
       ],
       cta: 'Essayer gratuitement',
       highlight: false,

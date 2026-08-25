@@ -94,7 +94,7 @@ async function telecharger(urlBrute) {
     const rep = await fetch(url, {
       redirect: 'manual',
       signal: stop,
-      headers: { Accept: 'image/*', 'User-Agent': 'Four Season/0.1 (+https://fourseason.fr)' },
+      headers: { Accept: 'image/*', 'User-Agent': 'Four Seasons/0.1 (+https://restockdesk.com)' },
     }).catch((err) => {
       throw new ErreurImage(
         err.name === 'TimeoutError' ? 'Délai dépassé au téléchargement de la photo.' : 'Photo inaccessible.',

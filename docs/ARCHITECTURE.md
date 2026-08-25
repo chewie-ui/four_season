@@ -3,7 +3,7 @@
 ## Vue d'ensemble
 
 ```
-   Site de l'agence cliente                    Four Season
+   Site de l'agence cliente                    Four Seasons
   ┌────────────────────────┐        ┌─────────────────────────────┐
   │ <img data-fourseason>      │        │  Express (server.js)        │
   │ + fourseason.js            │──POST──▶  /api/v1/render             │

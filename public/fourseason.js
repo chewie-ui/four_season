@@ -257,7 +257,7 @@
 
     var credit = document.createElement('p');
     credit.className = 'credit';
-    credit.innerHTML = 'Vues simulées par <a href="' + CFG.base + '" target="_blank" rel="noopener">Four Season</a> — sans valeur contractuelle.';
+    credit.innerHTML = 'Vues simulées par <a href="' + CFG.base + '" target="_blank" rel="noopener">Four Seasons</a> — sans valeur contractuelle.';
     barre.appendChild(credit);
 
     (img.parentNode || document.body).insertBefore(hote, img.nextSibling);

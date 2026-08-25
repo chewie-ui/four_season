@@ -1,5 +1,5 @@
 /**
- * CATALOGUE DES AMBIANCES — le coeur métier d'Four Season.
+ * CATALOGUE DES AMBIANCES — le coeur métier de Four Seasons.
  *
  * Ce fichier est la source unique de vérité pour :
  *   1. les boutons affichés dans le widget et sur le site,

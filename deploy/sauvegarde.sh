@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Sauvegarde quotidienne de Four Season.
+# Sauvegarde quotidienne de Four Seasons.
 #
 #   sudo cp deploy/sauvegarde.sh /usr/local/bin/fs-sauvegarde
 #   sudo chmod +x /usr/local/bin/fs-sauvegarde

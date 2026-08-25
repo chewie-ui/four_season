@@ -35,7 +35,7 @@ router.get('/demo', (req, res) => {
 router.get('/integration', (req, res) => {
   res.render('pages/integration', {
     title: `Intégration — ${brand.name}`,
-    description: 'Deux lignes de code pour ajouter Four Season à n’importe quel site.',
+    description: 'Deux lignes de code pour ajouter Four Seasons à n’importe quel site.',
     scenes: SCENES,
   });
 });
