@@ -38,7 +38,8 @@ export async function rattacherSource(sourceImageId, propertyId) {
 /** Un bien avec sa photo d'origine et l'état de chaque ambiance. */
 export async function lireBien(agencyId, publicId) {
   const biens = await query(
-    `SELECT id, public_id, title, city, external_ref, created_at
+    `SELECT id, public_id, title, city, external_ref, created_at,
+            address, latitude, longitude, country_code, facade_orientation, geocode_precision
        FROM properties
       WHERE agency_id = :a AND public_id = :p
       LIMIT 1`,
@@ -75,6 +76,14 @@ export async function lireBien(agencyId, publicId) {
     ville: bien.city,
     reference: bien.external_ref,
     creeLe: bien.created_at,
+    lieu: bien.latitude == null ? null : {
+      adresse: bien.address,
+      latitude: Number(bien.latitude),
+      longitude: Number(bien.longitude),
+      pays: bien.country_code,
+      orientationFacade: bien.facade_orientation,
+      precision: bien.geocode_precision,
+    },
     sources: sources.map((s) => ({
       publicId: s.public_id,
       url: urlPublique(s.storage_key),

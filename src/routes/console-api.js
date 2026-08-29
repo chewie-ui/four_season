@@ -13,6 +13,8 @@ import { creerBien, rattacherSource, lireBien, listerBiens, extraitIntegration }
 import { solde } from '../services/credits.js';
 import { get as lireStockage } from '../services/storage.js';
 import { sceneById } from '../config/scenes.js';
+import { geocoder } from '../services/geocodage.js';
+import { apercuSolaire } from '../services/prompt.js';
 import { query } from '../db/pool.js';
 
 const router = Router();
@@ -72,11 +74,95 @@ router.get('/biens/:publicId', async (req, res, next) => {
   try {
     const bien = await lireBien(req.session.agencyId, req.params.publicId);
     if (!bien) return res.status(404).json({ error: 'Bien introuvable.' });
-    res.json({ bien, credits: await solde(req.session.agencyId) });
+    res.json({
+      bien,
+      credits: await solde(req.session.agencyId),
+      soleil: apercuSolaireBien(bien, req.query.mois),
+    });
   } catch (err) {
     next(err);
   }
 });
+
+/**
+ * Géocode l'adresse et enregistre la position du bien.
+ *
+ * C'est ce qui permet de calculer la hauteur réelle du soleil : sans latitude,
+ * le prompt ne peut dire que « lumière d'hiver », ce que le modèle interprète
+ * au hasard. Avec, il donne des degrés et des longueurs d'ombre.
+ */
+router.post('/biens/:publicId/localiser', async (req, res, next) => {
+  try {
+    const bien = await lireBien(req.session.agencyId, req.params.publicId);
+    if (!bien) return res.status(404).json({ error: 'Bien introuvable.' });
+
+    const orientationBrute = req.body.orientation;
+    const orientation =
+      orientationBrute === '' || orientationBrute == null
+        ? null
+        : Math.round(((Number(orientationBrute) % 360) + 360) % 360);
+
+    if (orientationBrute != null && orientationBrute !== '' && !Number.isFinite(Number(orientationBrute))) {
+      return res.status(400).json({ error: 'Orientation de façade invalide.' });
+    }
+
+    let position = bien.lieu;
+
+    // L'adresse n'est regéocodée que si elle a changé : inutile de solliciter
+    // un service gratuit pour un simple changement d'orientation.
+    const adresse = String(req.body.adresse || '').trim();
+    if (adresse && adresse !== bien.lieu?.adresse) {
+      const g = await geocoder(adresse, String(req.body.pays || '').trim());
+      position = {
+        adresse: g.adresse,
+        latitude: g.latitude,
+        longitude: g.longitude,
+        pays: g.pays,
+        precision: g.precision,
+      };
+      await query(
+        `UPDATE properties
+            SET address = :a, latitude = :lat, longitude = :lon,
+                country_code = :pays, geocode_precision = :prec, city = COALESCE(:ville, city)
+          WHERE id = :id AND agency_id = :ag`,
+        {
+          a: g.adresse.slice(0, 255),
+          lat: g.latitude,
+          lon: g.longitude,
+          pays: g.pays,
+          prec: g.precision,
+          ville: g.ville,
+          id: bien.id,
+          ag: req.session.agencyId,
+        }
+      );
+    }
+
+    await query('UPDATE properties SET facade_orientation = :o WHERE id = :id AND agency_id = :a', {
+      o: orientation,
+      id: bien.id,
+      a: req.session.agencyId,
+    });
+
+    const frais = await lireBien(req.session.agencyId, req.params.publicId);
+    res.json({ bien: frais, soleil: apercuSolaireBien(frais, req.body.mois) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.publicMessage || err.message });
+    next(err);
+  }
+});
+
+/** Aperçu de la lumière pour chaque ambiance, affiché avant de générer. */
+function apercuSolaireBien(bien, mois) {
+  if (!bien?.lieu) return null;
+  const m = mois ? Number(mois) : null;
+  const out = {};
+  for (const s of Object.keys(sceneById)) {
+    const a = apercuSolaire(s, bien.lieu, m);
+    if (a) out[s] = a;
+  }
+  return out;
+}
 
 /**
  * Génération groupée : c'est le geste central de la console.
@@ -107,6 +193,8 @@ router.post('/biens/:publicId/generer', async (req, res, next) => {
     }
 
     const sourceId = await idSource(bien.sources[0].publicId);
+    const lieu = bien.lieu;
+    const mois = req.body.mois ? Number(req.body.mois) : null;
     const resultats = [];
 
     for (const scene of scenes) {
@@ -116,6 +204,8 @@ router.post('/biens/:publicId/generer', async (req, res, next) => {
           agencyId: req.session.agencyId,
           sourceImageId: sourceId,
           sceneId: scene,
+          lieu,
+          mois,
           priorite: 3,
         })),
       });
@@ -130,6 +220,8 @@ router.post('/biens/:publicId/generer', async (req, res, next) => {
           sourceImageId: sourceId,
           sceneId: 'libre',
           consigne,
+          lieu,
+          mois,
           priorite: 2,
         })),
       });

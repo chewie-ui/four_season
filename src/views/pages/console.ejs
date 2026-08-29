@@ -54,10 +54,76 @@
     </div>
   </section>
 
-  <!-- =========================================== ÉTAPE 2 : LES AMBIANCES -->
+  <!-- ========================================= ÉTAPE 2 : LA LOCALISATION -->
   <section class="c-panneau" data-etape="2">
     <div class="c-panneau-titre">
       <span class="c-num">2</span>
+      <h2>Où se trouve le bien</h2>
+    </div>
+
+    <p class="doux" style="font-size:.92rem;margin-bottom:1.2rem">
+      C'est ce qui rend la lumière juste. À Annecy le soleil culmine à 21° le
+      21 décembre et à 67° le 21 juin : les ombres passent du simple au triple
+      et ne tombent pas du même côté. Sans adresse, le modèle place le soleil
+      au hasard.
+    </p>
+
+    <div class="c-champs">
+      <div class="champ" style="grid-column:1/-1">
+        <label for="adresse">Adresse du bien</label>
+        <input id="adresse" type="text" maxlength="240"
+               placeholder="12 avenue de Chevêne, 74000 Annecy">
+      </div>
+      <div class="champ">
+        <label for="pays">Pays</label>
+        <select id="pays">
+          <option value="FR">France</option>
+          <option value="BE">Belgique</option>
+          <option value="CH">Suisse</option>
+          <option value="LU">Luxembourg</option>
+          <option value="">Autre</option>
+        </select>
+      </div>
+      <div class="champ">
+        <label for="orientation">
+          Orientation de la façade photographiée
+          <span class="opt">— vers où elle regarde</span>
+        </label>
+        <select id="orientation">
+          <option value="">Je ne sais pas</option>
+          <option value="0">Nord</option>
+          <option value="45">Nord-est</option>
+          <option value="90">Est</option>
+          <option value="135">Sud-est</option>
+          <option value="180">Sud</option>
+          <option value="225">Sud-ouest</option>
+          <option value="270">Ouest</option>
+          <option value="315">Nord-ouest</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-vide" data-localiser>Localiser</button>
+    <span data-localisation-etat class="doux" style="font-size:.88rem;margin-left:.8rem"></span>
+
+    <div data-soleil hidden style="margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--trait)">
+      <h4>Ce que le modèle recevra</h4>
+      <div class="c-cases" data-soleil-liste
+           style="margin-top:.8rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))"></div>
+    </div>
+
+    <p class="c-aide">
+      L'orientation compte autant que l'adresse : une façade plein sud est en
+      pleine lumière à midi, la même façade au nord reste dans son ombre toute
+      l'année. Si vous ne la connaissez pas, laissez « Je ne sais pas » —
+      le reste du calcul fonctionne quand même.
+    </p>
+  </section>
+
+  <!-- =========================================== ÉTAPE 3 : LES AMBIANCES -->
+  <section class="c-panneau" data-etape="3">
+    <div class="c-panneau-titre">
+      <span class="c-num">3</span>
       <h2>Les ambiances à générer</h2>
       <div class="c-prereglages">
         <button type="button" class="c-puce" data-preset="vendeur">Le trio vendeur</button>
@@ -93,6 +159,26 @@
 
     <div class="c-groupe">
       <div class="c-groupe-titre">
+        <label class="c-tout" style="cursor:default"><span>Mois de référence</span></label>
+        <small>Décale la position du soleil, sans changer l'ambiance</small>
+      </div>
+      <select data-mois style="padding:.6rem .8rem;background:var(--nuit);color:var(--texte);
+                               border:1px solid var(--trait);border-radius:3px;font:inherit;font-size:.9rem">
+        <option value="">Le mois propre à chaque ambiance</option>
+        <% ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+             .forEach(function (m, i) { %>
+          <option value="<%= i + 1 %>"><%= m.charAt(0).toUpperCase() + m.slice(1) %></option>
+        <% }); %>
+      </select>
+      <p class="c-aide">
+        Utile pour un même « coucher de soleil » en décembre puis en juillet :
+        à Annecy le soleil s'y couche à l'ouest-sud-ouest dans un cas, au
+        nord-ouest dans l'autre. Ce n'est pas la même photo.
+      </p>
+    </div>
+
+    <div class="c-groupe">
+      <div class="c-groupe-titre">
         <label class="c-tout" style="cursor:default">
           <input type="checkbox" data-libre-actif>
           <span>Demande libre</span>
@@ -108,10 +194,10 @@
     </div>
   </section>
 
-  <!-- ============================================ ÉTAPE 3 : LA GÉNÉRATION -->
-  <section class="c-panneau" data-etape="3">
+  <!-- ============================================ ÉTAPE 4 : LA GÉNÉRATION -->
+  <section class="c-panneau" data-etape="4">
     <div class="c-panneau-titre">
-      <span class="c-num">3</span>
+      <span class="c-num">4</span>
       <h2>Génération</h2>
     </div>
 

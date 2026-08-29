@@ -255,6 +255,37 @@ export const SCENES = [
   },
 ];
 
+/**
+ * Ancrage temporel de chaque ambiance.
+ *
+ * C'est ce qui permet de calculer la position réelle du soleil. Deux façons
+ * de situer un instant :
+ *
+ *   { mois, heure }               heure locale fixe
+ *   { mois, moment, decalage }    relatif à un évènement solaire, en minutes
+ *
+ * La seconde forme est la bonne pour tout ce qui touche au soleil : « coucher
+ * de soleil » n'est pas à 21 h — c'est à 15 h 54 le 21 décembre à Annecy et à
+ * 19 h 30 le 21 juin. Une heure fixe donnerait un ciel faux une fois sur deux.
+ */
+export const ANCRAGE = {
+  printemps:        { mois: 4,  heure: 11 },
+  ete:              { mois: 7,  heure: 14 },
+  automne:          { mois: 10, heure: 17 },
+  hiver:            { mois: 1,  moment: 'midi' },
+
+  aube:             { mois: 5,  moment: 'lever',   decalage: 15 },
+  midi:             { mois: 5,  moment: 'midi' },
+  coucher:          { mois: 7,  moment: 'coucher', decalage: -12 },
+  'heure-bleue':    { mois: 7,  moment: 'coucher', decalage: 25 },
+  nuit:             { mois: 7,  moment: 'coucher', decalage: 120 },
+
+  couvert:          { mois: 11, heure: 14 },
+  pluie:            { mois: 10, heure: 16 },
+  brouillard:       { mois: 11, moment: 'lever',   decalage: 45 },
+  'neige-tombante': { mois: 1,  heure: 15 },
+};
+
 // --- Tokens dérivés, uniquement pour la scène SVG de démonstration ---------
 // Position horizontale de l'astre (0 = bord gauche, 1 = bord droit) et flocons.
 const SUN_X = {

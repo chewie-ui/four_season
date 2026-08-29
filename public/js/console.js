@@ -67,7 +67,7 @@
   const libreActif = $('[data-libre-actif]');
   const libreTexte = $('[data-libre]');
 
-  cases.forEach((c) => c.addEventListener('change', () => { majGroupes(); majBouton(); }));
+  cases.forEach((c) => c.addEventListener('change', () => { majGroupes(); majBouton(); rafraichirSoleil(); }));
 
   $$('[data-groupe-tout]').forEach((tout) => {
     tout.addEventListener('change', () => {
@@ -125,6 +125,119 @@
     $('[data-generer]').disabled = n === 0 || !aUnePhoto;
   }
 
+  /* ------------------------------------------------------- localisation */
+
+  const etatLoc = $('[data-localisation-etat]');
+  const boutonLoc = $('[data-localiser]');
+  const selectMois = $('[data-mois]');
+
+  const CARDINAUX = {
+    0: 'nord', 45: 'nord-est', 90: 'est', 135: 'sud-est',
+    180: 'sud', 225: 'sud-ouest', 270: 'ouest', 315: 'nord-ouest',
+  };
+  const carte = (d) => CARDINAUX[Math.round(d / 45) * 45 % 360] || d + '°';
+
+  boutonLoc.addEventListener('click', async () => {
+    const adresse = $('#adresse').value.trim();
+    if (!adresse && !$('#orientation').value) {
+      etatLoc.textContent = 'Saisissez une adresse.';
+      return;
+    }
+    if (!bienActuel) {
+      etatLoc.textContent = 'Envoyez d’abord une photo : la localisation se rattache au bien.';
+      return;
+    }
+
+    boutonLoc.disabled = true;
+    etatLoc.textContent = 'Recherche de l’adresse…';
+    try {
+      const rep = await fetch(`/api/console/biens/${bienActuel.publicId}/localiser`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adresse,
+          pays: $('#pays').value,
+          orientation: $('#orientation').value,
+          mois: selectMois.value,
+        }),
+      });
+      const data = await rep.json();
+      if (!rep.ok) throw new Error(data.error || 'Localisation impossible.');
+
+      bienActuel = data.bien;
+      const l = data.bien.lieu;
+      if (l) {
+        const fiabilite = l.precision === 'exacte' ? '' :
+          l.precision === 'approchee' ? ' — adresse approchée, vérifiez' :
+            ' — adresse incertaine, précisez la rue et la ville';
+        etatLoc.innerHTML = `<span style="color:var(--or-clair)">${echapper(l.adresse)}</span>` +
+          `<span class="doux"> (${l.latitude.toFixed(3)}, ${l.longitude.toFixed(3)})${fiabilite}</span>`;
+        $('#adresse').value = l.adresse;
+      }
+      dessinerSoleil(data.soleil);
+    } catch (err) {
+      etatLoc.innerHTML = `<span style="color:#FF9B96">${echapper(err.message)}</span>`;
+    } finally {
+      boutonLoc.disabled = false;
+    }
+  });
+
+  // Changer de mois recalcule la position du soleil sans rien régénérer.
+  selectMois.addEventListener('change', async () => {
+    majBouton();
+    if (!bienActuel?.lieu) return;
+    const rep = await fetch(
+      `/api/console/biens/${bienActuel.publicId}?mois=${encodeURIComponent(selectMois.value)}`
+    );
+    if (rep.ok) dessinerSoleil((await rep.json()).soleil);
+  });
+
+  /**
+   * Montre à l'agent ce que le modèle va recevoir, ambiance par ambiance.
+   * C'est ce qui rend le calcul vérifiable au lieu d'être une boîte noire :
+   * il peut confronter « soleil à 21°, ombres vers le nord » à ce qu'il sait
+   * du terrain, et corriger l'orientation si ça ne colle pas.
+   */
+  function dessinerSoleil(soleil) {
+    dernierSoleil = soleil;
+    const boite = $('[data-soleil]');
+    const liste = $('[data-soleil-liste]');
+    if (!soleil) { boite.hidden = true; return; }
+
+    const choisies = selection();
+    const aMontrer = choisies.length ? choisies : ['midi', 'coucher', 'hiver', 'ete'];
+
+    liste.innerHTML = aMontrer
+      .filter((s) => soleil[s])
+      .map((s) => {
+        const a = soleil[s];
+        const label = document.querySelector(`input[name=scene][value="${s}"]`)
+          ?.closest('.c-case')?.querySelector('b')?.textContent || s;
+        const detail = a.sousHorizon
+          ? 'soleil sous l’horizon — aucune ombre portée'
+          : `soleil à <b>${a.hauteur}°</b> au ${carte(a.azimut)}` +
+            (a.ombre ? `, ombres × ${a.ombre}` : '');
+        return `<div class="c-case" style="cursor:default;flex-direction:column;align-items:flex-start;gap:.25rem">
+            <b style="font-size:.9rem">${echapper(label)}</b>
+            <span class="doux" style="font-size:.82rem">${detail}</span>
+            ${a.eclairement ? `<span class="doux" style="font-size:.78rem;opacity:.75">${echapper(traduireEclairement(a.eclairement))}</span>` : ''}
+          </div>`;
+      })
+      .join('');
+    boite.hidden = false;
+  }
+
+  const traduireEclairement = (en) =>
+    /fully lit/.test(en) ? 'façade en pleine lumière'
+      : /at an angle/.test(en) ? 'façade éclairée de biais, beau relief'
+        : /edge-on/.test(en) ? 'lumière rasante sur la façade'
+          : /own shade/.test(en) ? 'façade surtout à l’ombre'
+            : 'façade à contre-jour';
+
+  /** Redessine l'aperçu solaire quand la sélection d'ambiances change. */
+  let dernierSoleil = null;
+  function rafraichirSoleil() { if (dernierSoleil) dessinerSoleil(dernierSoleil); }
+
   /* --------------------------------------------------------- génération */
 
   const message = $('[data-message]');
@@ -154,7 +267,7 @@
       const rep = await fetch(`/api/console/biens/${bienActuel.publicId}/generer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenes: selection(), consigne: consigne() }),
+        body: JSON.stringify({ scenes: selection(), consigne: consigne(), mois: selectMois.value || null }),
       });
       const data = await rep.json();
       if (!rep.ok) throw new Error(data.error || 'Génération impossible.');

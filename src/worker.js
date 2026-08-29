@@ -19,8 +19,6 @@ import { generateVariant, GeminiError, isConfigured } from './services/gemini.js
 import { filigraner, encoder } from './services/watermark.js';
 import { debiterGeneration } from './services/credits.js';
 import { assertWithinBudget, record, BudgetExceeded } from './services/budget.js';
-import { buildPrompt, sceneById } from './config/scenes.js';
-import { construirePromptLibre } from './services/variants.js';
 
 const ID_WORKER = `w-${randomUUID().slice(0, 8)}`;
 const TENTATIVES_MAX = 3;
@@ -96,8 +94,8 @@ async function traiter(job) {
   // Le prompt exact est stocké avec la variante : le worker ne le reconstruit
   // jamais. Modifier scenes.js n'altère donc pas un job déjà en file, et un
   // rendu raté peut être rejoué à l'identique pour comprendre pourquoi.
-  const prompt = job.prompt || buildPrompt(job.scene_id);
-  if (!prompt) throw new Error(`Aucun prompt pour la variante ${job.variant_id}`);
+  const prompt = job.prompt;
+  if (!prompt) throw new Error(`Aucun prompt stocké pour la variante ${job.variant_id}`);
 
   const resultat = await generateVariant(source, job.source_mime || 'image/jpeg', job.scene_id, {
     promptComplet: prompt,
