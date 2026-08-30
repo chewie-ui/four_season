@@ -155,17 +155,26 @@ section { position: relative; }
 }
 .marque svg { width: 32px; height: 32px; flex: none; }
 .entete nav { display: flex; align-items: center; gap: clamp(1rem, 2vw, 2rem); }
-.entete nav a {
+
+/* Cible `.lien-nav` et non `a` : sinon la règle l'emporte en spécificité sur
+   `.btn-or`, et le bouton « Créer un compte » se retrouve en texte pâle sur
+   fond or — illisible. */
+.entete nav .lien-nav {
   font-size: .93rem; text-decoration: none; color: var(--texte-doux);
   position: relative; padding-block: .3rem;
   transition: color var(--t-court);
 }
-.entete nav a::after {
+.entete nav .lien-nav::after {
   content: ''; position: absolute; left: 0; right: 100%; bottom: 0;
   height: 1px; background: var(--or); transition: right var(--t-court);
 }
-.entete nav a:hover, .entete nav a[aria-current='page'] { color: var(--creme); }
-.entete nav a:hover::after, .entete nav a[aria-current='page']::after { right: 0; }
+.entete nav .lien-nav:hover,
+.entete nav .lien-nav[aria-current='page'] { color: var(--creme); }
+.entete nav .lien-nav:hover::after,
+.entete nav .lien-nav[aria-current='page']::after { right: 0; }
+
+/* Le bouton de la barre reste compact : la barre fait 76 px de haut. */
+.entete nav .btn { padding: .6em 1.2em; font-size: .9rem; }
 
 .menu-btn { display: none; }
 
@@ -183,6 +192,11 @@ section { position: relative; }
   text-decoration: none; cursor: pointer;
   transition: transform var(--t-court), background var(--t-court), border-color var(--t-court), color var(--t-court);
   white-space: nowrap;
+  /* Sans ces deux lignes, un <button> hérite du fond gris et de la bordure
+     du navigateur : le texte devient illisible. Les styles ci-dessous
+     avaient été écrits pour des <a>, où le problème ne se voit pas. */
+  background: transparent;
+  appearance: none;
 }
 .btn:active { transform: translateY(1px); }
 .btn-or { background: var(--or); color: #17110A; }
