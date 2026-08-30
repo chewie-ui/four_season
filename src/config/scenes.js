@@ -132,6 +132,30 @@ export const SCENES = [
       'Snow must follow the real geometry of the roof and terrain.',
   },
 
+  {
+    // Demander « Hiver sans neige » est contradictoire : l'ambiance Hiver
+    // décrit la neige sur tout un paragraphe. C'est une ambiance à part
+    // entière — et c'est l'hiver réel de la plupart des régions françaises,
+    // où il neige quelques jours par an.
+    id: 'hiver-sec',
+    group: 'saison',
+    label: 'Hiver sans neige',
+    short: 'Février, sec',
+    description: 'Arbres nus, herbe rase, lumière froide — sans un flocon.',
+    visual: {
+      skyTop: '#8FA3B5', skyBottom: '#D5DDE4', light: '#E2EBF2', lightAngle: 26,
+      foliage: '#7E7468', foliageAlt: '#9C9184', ground: '#8C8C74', wall: '#EAE4DA',
+      roof: '#6E5346', glow: 0.2, stars: 0, rain: 0, snow: 0, blossom: 0, fog: 0.1,
+    },
+    prompt:
+      'Transform the lighting and season of this real-estate photograph to a cold, dry winter day in February, ' +
+      'with NO SNOW anywhere — not on the ground, not on the roof, not on the vegetation. ' +
+      'Deciduous trees and shrubs completely bare of leaves, grass short and dormant in muted olive and straw tones, ' +
+      'evergreens dark and matt, bare earth visible in the beds. ' +
+      'Cold pale winter light, low contrast, slightly desaturated palette, crisp clear air. ' +
+      'This is the ordinary winter of most of France: cold and bare, but without snowfall.',
+  },
+
   // ---------------------------------------------------------------- MOMENTS
   {
     id: 'aube',
@@ -307,6 +331,7 @@ export const ANCRAGE = {
   ete:              { mois: 7,  heure: 14 },
   automne:          { mois: 10, heure: 17 },
   hiver:            { mois: 1,  moment: 'midi' },
+  'hiver-sec':      { mois: 2,  moment: 'midi' },
 
   aube:             { mois: 5,  moment: 'lever',   decalage: 15 },
   midi:             { mois: 5,  moment: 'midi' },
