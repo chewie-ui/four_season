@@ -9,6 +9,8 @@ import { SCENES, GROUPS, sceneById } from '../config/scenes.js';
 import { generateVariant, isConfigured as geminiReady, GeminiError } from '../services/gemini.js';
 import { put } from '../services/storage.js';
 import { assertWithinBudget, record, summary } from '../services/budget.js';
+import { geocoder } from '../services/geocodage.js';
+import { apercuSolaire, construire } from '../services/prompt.js';
 import { filigraner } from '../services/watermark.js';
 import { authentifier, corsWidget } from '../middleware/auth.js';
 import { ingererDepuisUrl, enregistrerSource } from '../services/images.js';
@@ -58,6 +60,57 @@ const demoLimiter = rateLimit({
   },
 });
 
+/**
+ * Aperçu de la lumière, sans générer d'image.
+ *
+ * Gratuit, instantané, et c'est le meilleur argument de vente du produit :
+ * le prospect voit qu'on calcule vraiment la position du soleil chez lui
+ * avant même d'avoir dépensé un centime. Bridé quand même, parce qu'on
+ * sollicite un service de géocodage public.
+ */
+const soleilLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  message: { error: 'Trop de recherches d’adresse. Patientez quelques minutes.' },
+});
+
+router.post('/demo/soleil', soleilLimiter, async (req, res, next) => {
+  try {
+    const adresse = String(req.body.adresse || '').trim();
+    if (!adresse) return res.status(400).json({ error: 'Indiquez une adresse.' });
+
+    const g = await geocoder(adresse, String(req.body.pays || '').trim());
+    const orientation = req.body.orientation === '' || req.body.orientation == null
+      ? null
+      : Number(req.body.orientation);
+
+    const lieu = {
+      latitude: g.latitude,
+      longitude: g.longitude,
+      pays: g.pays,
+      orientationFacade: Number.isFinite(orientation) ? orientation : null,
+    };
+    const mois = req.body.mois ? Number(req.body.mois) : null;
+
+    const ambiances = {};
+    for (const id of Object.keys(sceneById)) {
+      const a = apercuSolaire(id, lieu, mois);
+      if (a) ambiances[id] = a;
+    }
+
+    res.json({
+      lieu: { adresse: g.adresse, latitude: g.latitude, longitude: g.longitude, pays: g.pays, precision: g.precision },
+      ambiances,
+    });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.publicMessage || err.message });
+    next(err);
+  }
+});
+
 router.post('/demo/generate', demoLimiter, upload.single('photo'), async (req, res, next) => {
   try {
     const sceneId = String(req.body.scene || '');
@@ -82,8 +135,31 @@ router.post('/demo/generate', demoLimiter, upload.single('photo'), async (req, r
       .jpeg({ quality: 92 })
       .toBuffer();
 
+    // Même traitement que dans la console : si le prospect a renseigné une
+    // adresse, le prompt reçoit la position réelle du soleil. C'est la
+    // différence que la démo doit justement rendre visible.
+    let lieu = null;
+    const adresse = String(req.body.adresse || '').trim();
+    if (adresse) {
+      try {
+        const g = await geocoder(adresse, String(req.body.pays || '').trim());
+        const o = Number(req.body.orientation);
+        lieu = {
+          latitude: g.latitude, longitude: g.longitude, pays: g.pays,
+          orientationFacade: Number.isFinite(o) ? o : null,
+        };
+      } catch {
+        // Adresse non reconnue : on génère quand même, sans le calcul solaire.
+        lieu = null;
+      }
+    }
+
     const result = await generateVariant(prepared, 'image/jpeg', sceneId, {
-      extra: String(req.body.consigne || '').slice(0, 400),
+      promptComplet: construire(sceneId, {
+        lieu,
+        mois: req.body.mois ? Number(req.body.mois) : null,
+        consigne: String(req.body.consigne || '').slice(0, 400),
+      }),
     });
 
     await record(result.costMicroEur);
@@ -96,6 +172,7 @@ router.post('/demo/generate', demoLimiter, upload.single('photo'), async (req, r
       url: stored.url,
       latencyMs: result.latencyMs,
       model: result.model,
+      soleil: lieu ? apercuSolaire(sceneId, lieu, req.body.mois ? Number(req.body.mois) : null) : null,
     });
   } catch (err) {
     if (err instanceof GeminiError || err.status) {

@@ -29,6 +29,97 @@
     dire('Photo chargée. Choisissez une ambiance puis lancez la génération.');
   });
 
+  /* ------------------------------------------------- calcul de la lumière */
+
+  const boutonSoleil = form.querySelector('[data-soleil-calc]');
+  const zoneSoleil = form.querySelector('[data-soleil-resultat]');
+  const champScene = form.querySelector('#scene');
+
+  const CARDINAUX = {
+    0: 'nord', 45: 'nord-est', 90: 'est', 135: 'sud-est',
+    180: 'sud', 225: 'sud-ouest', 270: 'ouest', 315: 'nord-ouest',
+  };
+  const carte = (d) => CARDINAUX[(Math.round(d / 45) * 45) % 360] || d + '°';
+
+  const echapper = (s) =>
+    String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+  const traduireEclairement = (en) =>
+    /fully lit/.test(en) ? 'façade en pleine lumière'
+      : /at an angle/.test(en) ? 'façade éclairée de biais, beau relief'
+        : /edge-on/.test(en) ? 'lumière rasante sur la façade'
+          : /own shade/.test(en) ? 'façade surtout à l’ombre'
+            : 'façade à contre-jour';
+
+  let ambiancesSoleil = null;
+
+  boutonSoleil.addEventListener('click', async () => {
+    const adresse = form.querySelector('#adresse').value.trim();
+    if (!adresse) {
+      zoneSoleil.innerHTML = '<p class="doux" style="font-size:.86rem;margin:0">Indiquez une adresse.</p>';
+      return;
+    }
+
+    boutonSoleil.disabled = true;
+    zoneSoleil.innerHTML = '<p class="doux" style="font-size:.86rem;margin:0">Recherche de l’adresse…</p>';
+
+    try {
+      const rep = await fetch('/api/v1/demo/soleil', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adresse,
+          pays: form.querySelector('#pays').value,
+          orientation: form.querySelector('#orientation').value,
+          mois: form.querySelector('#mois').value,
+        }),
+      });
+      const data = await rep.json();
+      if (!rep.ok) throw new Error(data.error || 'Adresse introuvable.');
+
+      ambiancesSoleil = data.ambiances;
+      dessinerSoleil(data.lieu);
+    } catch (err) {
+      zoneSoleil.innerHTML =
+        `<p style="font-size:.86rem;margin:0;color:#FF9B96">${echapper(err.message)}</p>`;
+    } finally {
+      boutonSoleil.disabled = false;
+    }
+  });
+
+  // Changer d'ambiance ou de mois met l'aperçu à jour sans rien recalculer
+  // côté serveur : les valeurs de toutes les ambiances sont déjà là.
+  champScene.addEventListener('change', () => ambiancesSoleil && dessinerSoleil());
+  form.querySelector('#mois').addEventListener('change', () => {
+    // Le mois change la position du soleil : il faut refaire le calcul.
+    if (ambiancesSoleil) boutonSoleil.click();
+  });
+
+  function dessinerSoleil(lieu) {
+    if (!ambiancesSoleil) return;
+    const a = ambiancesSoleil[champScene.value];
+    const nom = champScene.selectedOptions[0]?.textContent.trim().split('—')[0].trim() || '';
+
+    if (!a) { zoneSoleil.innerHTML = ''; return; }
+
+    const detail = a.sousHorizon
+      ? 'soleil <b>sous l’horizon</b> — aucune ombre portée'
+      : `soleil à <b>${a.hauteur}°</b> au <b>${carte(a.azimut)}</b>` +
+        (a.ombre ? `, ombres <b>× ${a.ombre}</b> la hauteur des objets` : '');
+
+    zoneSoleil.innerHTML =
+      (lieu
+        ? `<p class="doux" style="font-size:.8rem;margin:0 0 .5rem">${echapper(lieu.adresse)}` +
+          (lieu.precision !== 'exacte' ? ' <span style="color:#E0A458">— adresse approchée</span>' : '') +
+          '</p>'
+        : '') +
+      `<div style="border-left:2px solid var(--or);padding-left:.8rem">
+         <p style="margin:0;font-size:.9rem"><b>${echapper(nom)}</b></p>
+         <p style="margin:.2rem 0 0;font-size:.88rem;color:var(--texte-doux)">${detail}</p>
+         ${a.eclairement ? `<p style="margin:.2rem 0 0;font-size:.84rem;color:var(--texte-doux);opacity:.8">${traduireEclairement(a.eclairement)}</p>` : ''}
+       </div>`;
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fichier = champPhoto.files && champPhoto.files[0];

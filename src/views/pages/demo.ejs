@@ -90,6 +90,66 @@
           </div>
 
           <div class="champ">
+            <label for="mois">Mois <span class="opt">— décale la position du soleil</span></label>
+            <select id="mois" name="mois">
+              <option value="">Le mois propre à l'ambiance</option>
+              <% ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+                   .forEach(function (m, i) { %>
+                <option value="<%= i + 1 %>"><%= m.charAt(0).toUpperCase() + m.slice(1) %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <!-- ============================ ce qui distingue le produit ===== -->
+          <div style="border:1px solid var(--or);border-radius:var(--rayon);
+                      padding:1.1rem;margin:1.4rem 0;background:rgba(224,164,88,.05)">
+            <p class="etiquette" style="margin-bottom:.6rem">Lumière exacte</p>
+            <p class="doux" style="font-size:.88rem;margin-bottom:1rem">
+              Donnez l'adresse et nous calculons la <b>vraie</b> position du soleil :
+              hauteur, direction, longueur des ombres. À Annecy le soleil culmine
+              à 21° le 21 décembre et à 67° le 21 juin — ce n'est pas la même photo.
+            </p>
+
+            <div class="champ">
+              <label for="adresse">Adresse du bien <span class="opt">— facultatif</span></label>
+              <input type="text" id="adresse" name="adresse" maxlength="200"
+                     placeholder="12 avenue de Chevêne, 74000 Annecy">
+            </div>
+
+            <div style="display:grid;gap:0 .8rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))">
+              <div class="champ">
+                <label for="pays">Pays</label>
+                <select id="pays" name="pays">
+                  <option value="FR">France</option>
+                  <option value="BE">Belgique</option>
+                  <option value="CH">Suisse</option>
+                  <option value="LU">Luxembourg</option>
+                  <option value="">Autre</option>
+                </select>
+              </div>
+              <div class="champ">
+                <label for="orientation">Façade tournée vers</label>
+                <select id="orientation" name="orientation">
+                  <option value="">Je ne sais pas</option>
+                  <option value="0">Nord</option>
+                  <option value="45">Nord-est</option>
+                  <option value="90">Est</option>
+                  <option value="135">Sud-est</option>
+                  <option value="180">Sud</option>
+                  <option value="225">Sud-ouest</option>
+                  <option value="270">Ouest</option>
+                  <option value="315">Nord-ouest</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-vide" data-soleil-calc style="width:100%">
+              Calculer la lumière — gratuit
+            </button>
+            <div data-soleil-resultat style="margin-top:.9rem"></div>
+          </div>
+
+          <div class="champ">
             <label for="consigne">Consigne libre <span class="opt">— facultatif</span></label>
             <input type="text" id="consigne" name="consigne" maxlength="200"
                    placeholder="ex. : ajouter de la neige sur les haies">
