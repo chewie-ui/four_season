@@ -10,3 +10,4 @@ deploy/*.local.conf
 
 # page de test locale du widget
 comparaison/
+verif/
