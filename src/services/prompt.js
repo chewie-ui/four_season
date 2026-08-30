@@ -148,6 +148,18 @@ export function construire(sceneId, { lieu = null, mois = null, consigne = '' } 
 
   if (scene) {
     morceaux.push(scene.prompt);
+
+    // Une ambiance d'heure ne doit PAS changer la saison. « Montrez-moi ce
+    // bien au coucher du soleil » ne veut pas dire « en été ». Sans cette
+    // consigne, une photo prise sous la neige revenait avec une pelouse verte,
+    // ce que l'agent immobilier repère instantanément.
+    if (scene.group === 'moment') {
+      morceaux.push(
+        'IMPORTANT — keep the season exactly as it is in the source photograph:',
+        'same state of vegetation, same foliage or bare branches, same snow or absence of snow',
+        'on the ground and on the roof. Only the time of day and the light change here.'
+      );
+    }
   } else if (sceneId === 'libre') {
     const propre = String(consigne).trim().replace(/["\\]/g, '').slice(0, 300);
     morceaux.push(

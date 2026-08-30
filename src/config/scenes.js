@@ -144,7 +144,7 @@ export const SCENES = [
       roof: '#6E3F30', glow: 0.85, stars: 0.1, rain: 0, snow: 0, blossom: 0, fog: 0,
     },
     prompt:
-      'Transform this real-estate photograph to golden hour at sunset, around 8:45pm in summer. ' +
+      'Transform this real-estate photograph to golden hour at sunset. ' +
       'The sun very low on the horizon, intense warm golden-orange light raking across the facade, ' +
       'dramatic sky with orange, magenta and violet gradients, long shadows, warm highlights on every edge, ' +
       'a soft glow in the air. Cinematic but photorealistic.',
