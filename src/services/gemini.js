@@ -52,10 +52,28 @@ function getClient() {
 export const isConfigured = () =>
   env.gemini.backend === 'vertex' ? Boolean(env.gemini.project) : env.gemini.configured;
 
-/** Coût observé par image, en millionièmes d'euro. À recaler avec la facture réelle. */
+/**
+ * Coût par image, en millionièmes d'euro.
+ *
+ * ⚠ Seule la première valeur est MESURÉE (facture Google à l'appui).
+ * Les autres sont des estimations prudentes : les modèles 3.x sont sortis
+ * récemment et leurs tarifs doivent être confirmés sur
+ * https://ai.google.dev/gemini-api/docs/pricing
+ *
+ * Le garde-fou budget s'appuie sur ces nombres : les surestimer coupe trop
+ * tôt, les sous-estimer laisse filer la dépense. En cas de doute on majore —
+ * une coupure prématurée se corrige, un dépassement non.
+ *
+ * `npm run gemini:test` affiche les jetons réellement consommés : c'est avec
+ * eux et la facture qu'on recale ce tableau.
+ */
 export const COST_MICRO_EUR = {
-  'gemini-2.5-flash-image': 36_000,        // ≈ 0,036 €
-  'gemini-3-pro-image-preview': 130_000,   // ≈ 0,13 €
+  'gemini-2.5-flash-image': 36_000,          // mesuré
+  'gemini-3.1-flash-image': 50_000,          // estimation prudente
+  'gemini-3.1-flash-image-preview': 50_000,  // estimation prudente
+  'gemini-3.1-flash-lite-image': 30_000,     // estimation prudente
+  'gemini-3-pro-image': 150_000,             // estimation prudente
+  'gemini-3-pro-image-preview': 150_000,     // estimation prudente
 };
 
 export class GeminiError extends Error {
@@ -136,12 +154,21 @@ export async function generateVariant(imageBuffer, mimeType, sceneId, opts = {})
     );
   }
 
+  // Les jetons réellement facturés : c'est avec eux qu'on recale
+  // COST_MICRO_EUR quand la facture Google arrive.
+  const u = response?.usageMetadata || {};
+
   return {
     buffer: Buffer.from(imagePart.inlineData.data, 'base64'),
     mimeType: imagePart.inlineData.mimeType || 'image/png',
     model,
     latencyMs: Date.now() - started,
-    costMicroEur: COST_MICRO_EUR[model] ?? 40_000,
+    costMicroEur: COST_MICRO_EUR[model] ?? 60_000,
+    jetons: {
+      entree: u.promptTokenCount ?? null,
+      sortie: u.candidatesTokenCount ?? null,
+      total: u.totalTokenCount ?? null,
+    },
     prompt,
   };
 }

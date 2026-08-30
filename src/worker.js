@@ -129,7 +129,8 @@ async function traiter(job) {
   });
 
   console.log(
-    `[worker] ✔ variante ${job.variant_id} « ${job.scene_id} » en ${(resultat.latencyMs / 1000).toFixed(1)} s`
+    `[worker] ✔ variante ${job.variant_id} « ${job.scene_id} » en ${(resultat.latencyMs / 1000).toFixed(1)} s` +
+      ` — ${resultat.model}, ${resultat.jetons?.total ?? '?'} jetons`
   );
 }
 
