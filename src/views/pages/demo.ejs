@@ -77,10 +77,14 @@
           <div class="champ">
             <label for="scene">Ambiance</label>
             <select id="scene" name="scene" required>
+              <!-- Sans cette option, un préréglage s'impose toujours : demander
+                   « décembre sans neige » revenait à lutter contre l'ambiance
+                   Hiver, qui décrit la neige sur tout un paragraphe. -->
+              <option value="libre">Aucune — je décris moi-même</option>
               <% groups.forEach(function (g) { %>
                 <optgroup label="<%= g.label %>">
                   <% scenesByGroup(g.id).forEach(function (sc) { %>
-                    <option value="<%= sc.id %>" <%= sc.id === 'hiver' ? 'selected' : '' %>>
+                    <option value="<%= sc.id %>" >
                       <%= sc.label %> — <%= sc.short %>
                     </option>
                   <% }); %>
@@ -150,9 +154,12 @@
           </div>
 
           <div class="champ">
-            <label for="consigne">Consigne libre <span class="opt">— facultatif</span></label>
+            <label for="consigne">
+              Ce que vous voulez voir
+              <span class="opt" data-consigne-note>— facultatif, en complément de l'ambiance</span>
+            </label>
             <input type="text" id="consigne" name="consigne" maxlength="200"
-                   placeholder="ex. : ajouter de la neige sur les haies">
+                   placeholder="ex. : un matin de décembre, sans neige, ciel dégagé">
           </div>
 
           <button class="btn btn-or btn-lg" type="submit" style="width:100%">

@@ -114,8 +114,18 @@ router.post('/demo/soleil', soleilLimiter, async (req, res, next) => {
 router.post('/demo/generate', demoLimiter, upload.single('photo'), async (req, res, next) => {
   try {
     const sceneId = String(req.body.scene || '');
+    const consigne = String(req.body.consigne || '').slice(0, 400).trim();
     const scene = sceneById[sceneId];
-    if (!scene) return res.status(400).json({ error: 'Ambiance inconnue.' });
+
+    // « libre » = aucune ambiance imposée : c'est la consigne qui pilote.
+    if (sceneId !== 'libre' && !scene) {
+      return res.status(400).json({ error: 'Ambiance inconnue.' });
+    }
+    if (sceneId === 'libre' && consigne.length < 3) {
+      return res.status(400).json({
+        error: 'Sans ambiance, décrivez ce que vous voulez voir — par exemple « un matin de décembre, sans neige ».',
+      });
+    }
     if (!req.file) return res.status(400).json({ error: 'Aucune photo reçue.' });
 
     if (!geminiReady()) {
@@ -158,7 +168,7 @@ router.post('/demo/generate', demoLimiter, upload.single('photo'), async (req, r
       promptComplet: construire(sceneId, {
         lieu,
         mois: req.body.mois ? Number(req.body.mois) : null,
-        consigne: String(req.body.consigne || '').slice(0, 400),
+        consigne,
       }),
     });
 
@@ -168,7 +178,7 @@ router.post('/demo/generate', demoLimiter, upload.single('photo'), async (req, r
     const stored = await put(finalBuffer, 'image/jpeg', 'demo');
 
     res.json({
-      scene: { id: scene.id, label: scene.label },
+      scene: { id: sceneId, label: scene ? scene.label : 'Votre description' },
       url: stored.url,
       latencyMs: result.latencyMs,
       model: result.model,

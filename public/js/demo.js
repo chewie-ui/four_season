@@ -120,10 +120,34 @@
        </div>`;
   }
 
+  /* ------------------------------ « aucune ambiance » : la consigne pilote */
+
+  const champConsigne = form.querySelector('#consigne');
+  const noteConsigne = form.querySelector('[data-consigne-note]');
+
+  function majConsigne() {
+    const libre = champScene.value === 'libre';
+    if (noteConsigne) {
+      noteConsigne.textContent = libre
+        ? '— obligatoire : rien d’autre ne guide le rendu'
+        : '— facultatif, en complément de l’ambiance';
+    }
+    champConsigne.required = libre;
+    champConsigne.placeholder = libre
+      ? 'ex. : un matin de décembre, sans neige, ciel dégagé'
+      : 'ex. : ajouter de la neige sur les haies';
+  }
+  champScene.addEventListener('change', majConsigne);
+  majConsigne();
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fichier = champPhoto.files && champPhoto.files[0];
     if (!fichier) return dire('Choisissez d’abord une photo.', 'erreur');
+    if (champScene.value === 'libre' && champConsigne.value.trim().length < 3) {
+      champConsigne.focus();
+      return dire('Sans ambiance, décrivez ce que vous voulez voir.', 'erreur');
+    }
 
     const donnees = new FormData(form);
     bouton.disabled = true;
