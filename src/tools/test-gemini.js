@@ -73,8 +73,15 @@ try {
   console.log('  ✔  ÇA MARCHE');
   console.log('');
   console.log(`     durée   : ${(res.latencyMs / 1000).toFixed(1)} s`);
-  console.log(`     coût    : ~${(res.costMicroEur / 1_000_000).toFixed(3)} €`);
+  console.log(`     coût    : ~${(res.costMicroEur / 1_000_000).toFixed(3)} € (estimation)`);
   console.log(`     modèle  : ${res.model}`);
+  if (res.jetons?.total) {
+    // Les jetons sont la seule base fiable pour recaler le coût : c'est ce
+    // que Google facture réellement, indépendamment de nos estimations.
+    console.log(
+      `     jetons  : ${res.jetons.entree} entrée + ${res.jetons.sortie} sortie = ${res.jetons.total}`
+    );
+  }
   console.log(`     résultat: ${sortie}`);
   console.log('');
   console.log('     Ouvrez le fichier et comparez avec la photo d’origine.');
