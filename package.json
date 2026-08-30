@@ -16,7 +16,8 @@
     "gemini:test": "node src/tools/test-gemini.js",
     "gemini:models": "node src/tools/list-models.js",
     "preflight": "node src/tools/preflight.js",
-    "cles": "node src/tools/cles.js"
+    "cles": "node src/tools/cles.js",
+    "gemini:comparer": "node src/tools/comparer.js"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
