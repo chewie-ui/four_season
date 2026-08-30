@@ -176,7 +176,21 @@ export function construire(sceneId, { lieu = null, mois = null, consigne = '' } 
   const solaire = contexteSolaire(sceneId === 'libre' ? 'midi' : sceneId, lieu, { mois });
   if (solaire) morceaux.push(solaire);
 
-  if (scene && consigne) morceaux.push(String(consigne).trim().slice(0, 300));
+  // La consigne de l'agent arrive APRÈS l'ambiance et avec une priorité
+  // explicite. Sans cela elle perd systématiquement : demander « pas de
+  // neige » sur l'ambiance Hiver revenait à contredire un paragraphe entier
+  // décrivant la neige, et c'est le paragraphe qui gagnait.
+  if (scene && consigne) {
+    const propre = String(consigne).trim().replace(/["\\]/g, '').slice(0, 300);
+    if (propre) {
+      morceaux.push(
+        `OVERRIDE — the estate agent explicitly asks: "${propre}".`,
+        'This instruction takes precedence over any conflicting detail described above.',
+        'If it contradicts part of the ambience, follow the agent and ignore that part.',
+        'It never overrides the absolute constraints below.'
+      );
+    }
+  }
 
   morceaux.push(PRESERVE_CLAUSE);
   return morceaux.join(' ');

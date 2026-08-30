@@ -11,16 +11,50 @@
  * le modèle a tendance à redessiner la maison.
  */
 
-/** Clause anti-dérive ajoutée à CHAQUE prompt. */
+/**
+ * Clause anti-dérive, ajoutée à CHAQUE prompt et toujours en dernier.
+ *
+ * Elle a été durcie après un rendu où le modèle avait ajouté des maisons
+ * voisines qui n'existaient pas. La version précédente ne protégeait que
+ * le bâtiment photographié : le modèle en déduisait qu'il pouvait redessiner
+ * tout le reste. Un acheteur qui vient visiter doit reconnaître exactement
+ * ce qu'il a vu en ligne — voisinage compris.
+ *
+ * Formulée en interdictions énumérées plutôt qu'en principe général : un
+ * modèle d'image suit mieux « ne change pas le nombre de bâtiments » que
+ * « reste fidèle ».
+ */
 export const PRESERVE_CLAUSE = [
-  'CRITICAL — preserve exactly, do not redraw or reinterpret:',
-  'the architecture of the building (roof shape and pitch, number and position of every window and door, chimney, balconies, materials, facade colour and texture),',
-  'the exact camera angle, focal length, framing and perspective,',
-  'the position and proportions of every permanent element (driveway, walls, fences, pool, terrace),',
-  'the aspect ratio and composition.',
-  'Only lighting, sky, weather, vegetation state and seasonal ground cover may change.',
-  'The result must be immediately recognisable as the very same property photographed at a different moment.',
-  'Photorealistic real-estate photography, natural colours, no text, no watermark, no people added, no furniture added.',
+  'ABSOLUTE CONSTRAINTS — this is a photo edit, not a new image.',
+  'You are re-lighting an existing photograph. Every object present must stay,',
+  'in the same place, with the same shape, the same size and the same materials.',
+
+  'NEVER ADD anything that is not already in the photograph:',
+  'no new house, no neighbouring building, no extension, no outbuilding, no shed,',
+  'no wall, no fence, no hedge, no path, no vehicle, no person, no animal,',
+  'no furniture, no decoration, no flowers, no planter, no pool, no terrace,',
+  'no mountain, no hill, no lake, no tree that was not already there.',
+
+  'NEVER REMOVE anything that is in the photograph, and never change its position.',
+
+  'PRESERVE EXACTLY:',
+  'the main building — roof shape, pitch and covering, number and exact position of every window and door,',
+  'chimneys, balconies, facade materials, colour and texture, every visible detail of the walls;',
+  'ALL other buildings visible in the frame, including neighbouring houses in the background —',
+  'same number, same shapes, same roofs, same positions;',
+  'the horizon line and the skyline profile;',
+  'the ground layout — driveway, paths, terrace, pool, walls, fences, parked objects;',
+  'the number, position, size and species of every tree and shrub;',
+  'the exact camera position, angle, focal length, framing, perspective and aspect ratio.',
+  'Do not zoom, do not crop, do not re-frame, do not extend the image beyond its original edges.',
+
+  'ONLY THESE MAY CHANGE: the light, the colour and content of the sky, the weather,',
+  'the seasonal state of the existing vegetation (leaves, blossom, bare branches),',
+  'snow or water on the ground and on existing surfaces, and artificial lighting.',
+
+  'The result must be recognisable, side by side with the original, as the very same',
+  'property photographed from the very same spot at a different moment.',
+  'Photorealistic real-estate photography, natural colours, no text, no watermark, no logo.',
 ].join(' ');
 
 export const GROUPS = [

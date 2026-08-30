@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { statSync } from 'node:fs';
 
 import env from './src/config/env.js';
 import brand from './src/config/brand.js';
@@ -18,6 +19,28 @@ import { ping as dbPing, closePool } from './src/db/pool.js';
 import { demarrerWorker, arreterWorker } from './src/worker.js';
 
 const root = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Empreinte des fichiers statiques, calculée au démarrage.
+ *
+ * Sans elle, un CSS servi avec max-age=7j reste sept jours dans le navigateur
+ * des visiteurs : un correctif déployé n'atteint personne. On suffixe donc les
+ * URL d'un jeton qui change dès que le fichier change — le cache long reste
+ * bénéfique, mais une correction est visible immédiatement.
+ */
+function empreinteStatiques() {
+  const fichiers = [
+    'public/css/site.css', 'public/css/scene.css', 'public/css/console.css',
+    'public/js/site.js', 'public/js/demo.js', 'public/js/console.js',
+    'public/fourseason.js',
+  ];
+  let somme = 0;
+  for (const f of fichiers) {
+    try { somme += statSync(join(root, f)).mtimeMs; } catch { /* absent : ignoré */ }
+  }
+  return Math.round(somme).toString(36).slice(-8);
+}
+const VERSION_STATIQUES = empreinteStatiques();
 const app = express();
 
 if (env.trustProxy) app.set('trust proxy', 1);
@@ -76,6 +99,7 @@ app.use((req, res, next) => {
   res.locals.baseUrl = env.baseUrl;
   res.locals.year = new Date().getFullYear();
   res.locals.indexable = env.indexable;
+  res.locals.v = VERSION_STATIQUES;
   next();
 });
 

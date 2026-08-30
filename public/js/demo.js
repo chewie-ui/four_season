@@ -142,6 +142,27 @@
 
       apercu.src = data.url;
       apercu.hidden = false;
+
+      // L'étiquette sur l'image affichait l'ambiance de l'illustration
+      // vectorielle, pas celle qu'on vient de générer : on lisait « Automne »
+      // sur un rendu d'hiver. Elle suit désormais le rendu réel.
+      const titre = document.querySelector('[data-etiquette-titre]');
+      const detail = document.querySelector('[data-etiquette-detail]');
+      if (titre) titre.textContent = data.scene.label;
+      if (detail) {
+        const mois = form.querySelector('#mois');
+        detail.textContent = mois && mois.value
+          ? mois.selectedOptions[0].textContent.trim()
+          : 'rendu généré';
+      }
+      // Les boutons d'ambiance ne pilotent que l'illustration : les laisser
+      // actifs sous une vraie photo laisse croire qu'ils la changent.
+      document.querySelectorAll('.vis-choix button').forEach((b) => {
+        b.setAttribute('aria-pressed', 'false');
+        b.disabled = true;
+        b.title = 'Ces boutons ne pilotent que l’illustration de départ.';
+      });
+
       dire(`Rendu « ${data.scene.label} » généré en ${(data.latencyMs / 1000).toFixed(1)} s.`, 'ok');
     } catch {
       dire('Impossible de joindre le serveur. Réessayez.', 'erreur');
