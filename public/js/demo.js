@@ -53,8 +53,29 @@
 
   let ambiancesSoleil = null;
 
-  boutonSoleil.addEventListener('click', async () => {
-    const adresse = form.querySelector('#adresse').value.trim();
+  const champAdresse = form.querySelector('#adresse');
+  let derniereAdresse = '';
+
+  /**
+   * Le calcul part quand l'utilisateur QUITTE le champ, pas à chaque frappe :
+   * le géocodage interroge un service public gratuit, une requête par lettre
+   * serait un abus. Quitter le champ est aussi le moment où l'adresse est
+   * réellement finie d'écrire.
+   */
+  champAdresse.addEventListener('blur', () => {
+    const a = champAdresse.value.trim();
+    if (a.length > 5 && a !== derniereAdresse) calculerSoleil();
+  });
+  ['#pays', '#orientation'].forEach((sel) =>
+    form.querySelector(sel).addEventListener('change', () => {
+      if (champAdresse.value.trim().length > 5) calculerSoleil();
+    })
+  );
+
+  boutonSoleil.addEventListener('click', calculerSoleil);
+
+  async function calculerSoleil() {
+    const adresse = champAdresse.value.trim();
     if (!adresse) {
       zoneSoleil.innerHTML = '<p class="doux" style="font-size:.86rem;margin:0">Indiquez une adresse.</p>';
       return;
@@ -78,6 +99,7 @@
       if (!rep.ok) throw new Error(data.error || 'Adresse introuvable.');
 
       ambiancesSoleil = data.ambiances;
+      derniereAdresse = adresse;
       dessinerSoleil(data.lieu);
     } catch (err) {
       zoneSoleil.innerHTML =
@@ -85,7 +107,7 @@
     } finally {
       boutonSoleil.disabled = false;
     }
-  });
+  }
 
   // Changer d'ambiance ou de mois met l'aperçu à jour sans rien recalculer
   // côté serveur : les valeurs de toutes les ambiances sont déjà là.
