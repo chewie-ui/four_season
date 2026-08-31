@@ -60,6 +60,12 @@ app.use(
         imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
         connectSrc: ["'self'"],
         frameAncestors: ["'self'"],
+        // Sans cette ligne, le bouton « Souscrire » ne fait RIEN.
+        // Helmet pose `form-action 'self'` par défaut ; le navigateur laisse
+        // partir le POST vers /paiement/souscrire, puis bloque la redirection
+        // 303 vers Stripe — silencieusement, sans rien dans les logs serveur.
+        // La directive couvre aussi les redirections issues d'un formulaire.
+        formAction: ["'self'", 'https://checkout.stripe.com', 'https://billing.stripe.com'],
       },
     },
     // Le widget doit pouvoir être chargé depuis les sites de nos clients.
