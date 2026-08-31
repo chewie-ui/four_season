@@ -332,6 +332,10 @@
       );
     }
 
+    // On décoche après coup : laisser « Nouvel essai » actif ferait payer un
+    // second lot au clic suivant, sans que personne l'ait demandé.
+    $('[data-forcer]').checked = false;
+
     $('[data-galerie]').hidden = false;
     $('[data-galerie]').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     demarrerSondage();
