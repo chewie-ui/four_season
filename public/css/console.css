@@ -28,8 +28,12 @@ body { overflow-x: hidden; }
 .c-credits {
   font-family: var(--mono); font-size: .74rem; letter-spacing: .08em;
   padding: .45rem .8rem; border: 1px solid var(--trait); border-radius: 100px;
-  color: var(--or-clair); white-space: nowrap;
+  color: var(--or-clair); white-space: nowrap; text-decoration: none;
 }
+a.c-credits:hover { border-color: var(--or); }
+/* À zéro, le solde cesse d'être une information et devient une alerte. */
+.c-credits.vide { color: #FF9B96; border-color: rgba(217, 83, 79, .55); }
+a.c-credits.vide:hover { border-color: #FF9B96; }
 
 /* ------------------------------------------------------------- corps */
 .c-corps {
@@ -182,6 +186,17 @@ input[type=checkbox] { accent-color: var(--or); width: 16px; height: 16px; curso
 .c-vignette figcaption b { font-weight: 600; }
 .c-vignette figcaption a { color: var(--or-clair); font-size: .74rem; text-decoration: none; }
 .c-vignette figcaption a:hover { text-decoration: underline; }
+
+/* Bandeau « plus de crédits » : une explication et une sortie, pas un mur. */
+.c-solde-vide {
+  display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+  margin-top: 1rem; padding: .9rem 1rem;
+  border: 1px solid rgba(217, 83, 79, .5); border-radius: 3px;
+  background: rgba(217, 83, 79, .07);
+}
+.c-solde-vide > div { flex: 1; min-width: 15rem; }
+.c-solde-vide b { display: block; font-size: .95rem; color: #FF9B96; }
+.c-solde-vide span { display: block; margin-top: .25rem; font-size: .86rem; color: var(--texte-doux); }
 
 /* Actions groupées à droite de la légende : relancer, télécharger. */
 .c-vignette .c-actions { display: flex; align-items: center; gap: .5rem; flex: none; }

@@ -7,7 +7,12 @@
     <%= brand.name %> <span>console</span>
   </a>
   <div class="c-entete-droite">
-    <span class="c-credits" data-credits><%= credits %> crédits</span>
+    <!-- Le solde est un lien : c'était le seul endroit où l'agent voyait
+         « 0 crédits », et rien n'y menait à la page où on en achète. -->
+    <a class="c-credits<%= credits <= 0 ? ' vide' : '' %>" data-credits
+       href="/console/compte#offre"
+       title="Voir mon solde et recharger"><%= credits %> crédits</a>
+    <a class="btn btn-vide" href="/console/compte" style="padding:.5em 1em;font-size:.85rem">Mon compte</a>
     <form method="post" action="/console/deconnexion" style="display:inline">
       <button class="btn btn-vide" type="submit" style="padding:.5em 1em;font-size:.85rem">Quitter</button>
     </form>
@@ -222,6 +227,16 @@
         côte à côte. Chaque ambiance cochée coûte un crédit.</small>
       </span>
     </label>
+
+    <!-- Affiché dès que le solde tombe à zéro, sans attendre un clic refusé. -->
+    <div class="c-solde-vide" data-solde-vide hidden>
+      <div>
+        <b>Vous n’avez plus de crédits.</b>
+        <span>Une ambiance = un crédit. Vos biens et vos rendus déjà générés
+        restent accessibles et téléchargeables.</span>
+      </div>
+      <a class="btn btn-or" href="/console/compte#offre">Recharger →</a>
+    </div>
 
     <div class="c-message" data-message role="status" aria-live="polite"></div>
 

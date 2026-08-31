@@ -113,7 +113,17 @@
   const selection = () => cases.filter((c) => c.checked).map((c) => c.value);
   const consigne = () => (libreActif.checked ? libreTexte.value.trim() : '');
 
+  /** Le solde tel qu'il est affiché dans l'en-tête — la seule source à jour. */
+  const soldeAffiche = () => parseInt($('[data-credits]').textContent, 10) || 0;
+
+  function majSolde() {
+    const vide = soldeAffiche() <= 0;
+    $('[data-solde-vide]').hidden = !vide;
+    $('[data-credits]').classList.toggle('vide', vide);
+  }
+
   function majBouton() {
+    majSolde();
     const n = selection().length + (consigne() ? 1 : 0);
     $('[data-compte]').textContent = n;
     $('[data-pluriel]').textContent = n > 1 ? 's' : '';
@@ -264,6 +274,22 @@
   const dire = (txt, type = '') =>
     (message.innerHTML = txt ? `<p class="${type}" style="margin:0">${txt}</p>` : '');
 
+  /**
+   * Solde épuisé.
+   *
+   * Un refus sec (« il vous reste 0 crédit ») laissait l'agent chercher où
+   * recharger : rien, dans toute la console, ne menait à la page des offres.
+   * Le refus porte donc lui-même le chemin.
+   */
+  const direManqueCredits = (txt) => {
+    message.innerHTML =
+      `<p class="err" style="margin:0 0 .7rem">${echapper(txt)}</p>
+       <a class="btn btn-or" href="/console/compte#offre">Recharger mes crédits →</a>
+       <p class="doux" style="font-size:.85rem;margin:.6rem 0 0">
+         Vos biens et vos ambiances déjà générées restent accessibles.
+       </p>`;
+  };
+
   $('[data-generer]').addEventListener('click', async () => {
     const bouton = $('[data-generer]');
     bouton.disabled = true;
@@ -295,6 +321,11 @@
         }),
       });
       const data = await rep.json();
+      if (rep.status === 402) {
+        direManqueCredits(data.error || 'Crédits épuisés.');
+        bouton.disabled = false;
+        return;
+      }
       if (!rep.ok) throw new Error(data.error || 'Génération impossible.');
 
       annoncer(data);
@@ -360,6 +391,7 @@
         }),
       });
       const data = await rep.json();
+      if (rep.status === 402) return direManqueCredits(data.error || 'Crédits épuisés.');
       if (!rep.ok) throw new Error(data.error || 'Relance impossible.');
       annoncer(data);
     } catch (err) {
@@ -387,6 +419,7 @@
       const { bien, credits } = await rep.json();
       bienActuel = bien;
       $('[data-credits]').textContent = `${credits} crédits`;
+      majSolde();
       dessinerGalerie(bien);
 
       const reste = bien.variantes.some((v) => v.statut === 'pending' || v.statut === 'processing');
