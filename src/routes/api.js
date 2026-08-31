@@ -11,7 +11,7 @@ import { put } from '../services/storage.js';
 import { assertWithinBudget, record, summary } from '../services/budget.js';
 import { geocoder } from '../services/geocodage.js';
 import { apercuSolaire, construire } from '../services/prompt.js';
-import { filigraner } from '../services/watermark.js';
+import { filigraner, filigranerDemo } from '../services/watermark.js';
 import { authentifier, corsWidget } from '../middleware/auth.js';
 import { ingererDepuisUrl, enregistrerSource } from '../services/images.js';
 import { obtenirOuCreer, etatVariante } from '../services/variants.js';
@@ -174,7 +174,7 @@ router.post('/demo/generate', demoLimiter, upload.single('photo'), async (req, r
 
     await record(result.costMicroEur);
 
-    const finalBuffer = await filigraner(result.buffer);
+    const finalBuffer = await filigranerDemo(result.buffer);
     const stored = await put(finalBuffer, 'image/jpeg', 'demo');
 
     res.json({
