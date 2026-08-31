@@ -177,6 +177,11 @@ router.post('/biens/:publicId/generer', async (req, res, next) => {
     const scenes = Array.isArray(req.body.scenes) ? req.body.scenes : [];
     const consigne = String(req.body.consigne || '').slice(0, 300);
 
+    // `forcer` : l'agent veut un autre essai d'une ambiance déjà rendue.
+    // Sans lui, le cache renvoie l'existante et il a l'impression que le
+    // bouton ne fait rien. Avec lui, chaque ambiance cochée est un crédit.
+    const forcer = req.body.forcer === true;
+
     if (!scenes.length && !consigne) {
       return res.status(400).json({ error: 'Cochez au moins une ambiance.' });
     }
@@ -206,6 +211,7 @@ router.post('/biens/:publicId/generer', async (req, res, next) => {
           sceneId: scene,
           lieu,
           mois,
+          forcer,
           priorite: 3,
         })),
       });
@@ -222,12 +228,17 @@ router.post('/biens/:publicId/generer', async (req, res, next) => {
           consigne,
           lieu,
           mois,
+          forcer,
           priorite: 2,
         })),
       });
     }
 
-    res.json({ lances: resultats.length, resultats });
+    // On distingue ce qui part vraiment de ce qui était déjà en cache.
+    // Annoncer « 2 générations en cours » quand rien ne part est un mensonge
+    // que l'agent découvre en regardant une barre qui n'avance pas.
+    const lances = resultats.filter((r) => r.status !== 'ready').length;
+    res.json({ lances, deja: resultats.length - lances, resultats });
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.publicMessage || err.message });
     next(err);
@@ -285,7 +296,10 @@ router.get('/biens/:publicId/zip', async (req, res, next) => {
     for (const v of pretes) {
       const cle = v.url.split('/media/')[1];
       const num = String(i++).padStart(2, '0');
-      zip.append(await lireStockage(cle), { name: `${nomBase}/${num}-${v.scene}.jpg` });
+      // Le préfixe numérique suffirait à éviter la collision, mais « -v2 » dit
+      // à l'agent laquelle des deux versions il ouvre.
+      const suffixe = v.version > 1 ? `-v${v.version}` : '';
+      zip.append(await lireStockage(cle), { name: `${nomBase}/${num}-${v.scene}${suffixe}.jpg` });
     }
 
     await zip.finalize();

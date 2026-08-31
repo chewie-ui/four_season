@@ -207,9 +207,21 @@
       </button>
       <p class="c-cout doux">
         <span data-cout>0,00 €</span> · environ <span data-duree>15 s</span>
-        <br><small>Les ambiances déjà calculées sont regénérées gratuitement.</small>
+        <br><small data-cout-note>Une ambiance déjà calculée ressort du cache, sans frais.</small>
       </p>
     </div>
+
+    <!-- Sans cette case, cocher une ambiance déjà rendue ne produisait rien de
+         visible : le cache renvoyait l'existante et l'agent croyait le bouton
+         cassé. Elle rend le choix explicite, et payant. -->
+    <label class="c-forcer">
+      <input type="checkbox" data-forcer>
+      <span>
+        <b>Nouvel essai</b>
+        <small>Regénère même les ambiances déjà prêtes et garde les deux versions
+        côte à côte. Chaque ambiance cochée coûte un crédit.</small>
+      </span>
+    </label>
 
     <div class="c-message" data-message role="status" aria-live="polite"></div>
 

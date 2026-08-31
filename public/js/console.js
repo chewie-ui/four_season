@@ -108,6 +108,7 @@
     majBouton();
   });
   libreTexte.addEventListener('input', majBouton);
+  $('[data-forcer]').addEventListener('change', majBouton);
 
   const selection = () => cases.filter((c) => c.checked).map((c) => c.value);
   const consigne = () => (libreActif.checked ? libreTexte.value.trim() : '');
@@ -123,6 +124,25 @@
     // (bien rouvert depuis « Biens récents ») : les deux cas sont valides.
     const aUnePhoto = Boolean(fichier.files?.[0]) || Boolean(bienActuel?.sources?.length);
     $('[data-generer]').disabled = n === 0 || !aUnePhoto;
+
+    // Prévenir AVANT le clic que certaines ambiances cochées ne bougeront pas.
+    const forcer = $('[data-forcer]').checked;
+    const dejaPretes = new Set(
+      (bienActuel?.variantes || []).filter((v) => v.statut === 'ready').map((v) => v.scene)
+    );
+    const dejaCochees = selection().filter((s) => dejaPretes.has(s)).length;
+
+    const note = $('[data-cout-note]');
+    if (forcer) {
+      note.textContent =
+        'Nouvel essai : tout ce qui est coché est regénéré et facturé, les versions précédentes sont conservées.';
+    } else if (dejaCochees) {
+      note.textContent =
+        `${dejaCochees} ambiance${dejaCochees > 1 ? 's déjà prêtes ressortiront' : ' déjà prête ressortira'} ` +
+        'du cache sans rien relancer. Cochez « Nouvel essai » pour une autre version.';
+    } else {
+      note.textContent = 'Une ambiance déjà calculée ressort du cache, sans frais.';
+    }
   }
 
   /* ------------------------------------------------------- localisation */
@@ -267,12 +287,17 @@
       const rep = await fetch(`/api/console/biens/${bienActuel.publicId}/generer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenes: selection(), consigne: consigne(), mois: selectMois.value || null }),
+        body: JSON.stringify({
+          scenes: selection(),
+          consigne: consigne(),
+          mois: selectMois.value || null,
+          forcer: $('[data-forcer]').checked,
+        }),
       });
       const data = await rep.json();
       if (!rep.ok) throw new Error(data.error || 'Génération impossible.');
 
-      dire(`${data.lances} ambiance${data.lances > 1 ? 's' : ''} en cours de génération.`, 'ok');
+      annoncer(data);
       $('[data-galerie]').hidden = false;
       $('[data-galerie]').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       demarrerSondage();
@@ -281,6 +306,62 @@
       bouton.disabled = false;
     }
   });
+
+  /**
+   * Dire ce qui part vraiment.
+   *
+   * Le serveur distingue les ambiances mises en file de celles qui existaient
+   * déjà. Annoncer « 2 en cours » quand rien ne part laisse l'agent devant une
+   * galerie figée, persuadé que le bouton est cassé — c'était le cas.
+   */
+  function annoncer(data) {
+    const n = data.lances;
+    const d = data.deja || 0;
+
+    if (n === 0) {
+      dire(
+        `Ces ${d > 1 ? d + ' ambiances étaient' : 'ambiance était'} déjà prête${d > 1 ? 's' : ''} : ` +
+        'rien de neuf n’a été lancé, et rien ne vous est facturé. ' +
+        'Pour un autre essai, cochez <b>Nouvel essai</b> ou utilisez ↻ sous une vignette.'
+      );
+    } else {
+      dire(
+        `${n} ambiance${n > 1 ? 's' : ''} en cours de génération.` +
+        (d ? ` ${d} ${d > 1 ? 'étaient déjà prêtes' : 'était déjà prête'}.` : ''),
+        'ok'
+      );
+    }
+
+    $('[data-galerie]').hidden = false;
+    $('[data-galerie]').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    demarrerSondage();
+  }
+
+  /**
+   * « Un autre essai » sur une seule ambiance, depuis sa vignette.
+   * C'est le geste naturel : on regarde un rendu qui ne plaît pas, on relance
+   * celui-là. Un crédit, une version de plus, l'ancienne reste.
+   */
+  async function relancer(scene) {
+    if (!bienActuel) return;
+    dire('Mise en file…');
+    try {
+      const rep = await fetch(`/api/console/biens/${bienActuel.publicId}/generer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scenes: [scene],
+          mois: selectMois.value || null,
+          forcer: true,
+        }),
+      });
+      const data = await rep.json();
+      if (!rep.ok) throw new Error(data.error || 'Relance impossible.');
+      annoncer(data);
+    } catch (err) {
+      dire(err.message, 'err');
+    }
+  }
 
   /* ------------------------------------------------------------ suivi */
 
@@ -343,20 +424,37 @@
     $$('.c-vignette.prete', grille).forEach((el) =>
       el.addEventListener('click', () => ouvrirLoupe(el.dataset.url, el.dataset.label))
     );
+    $$('[data-relance]', grille).forEach((b) =>
+      b.addEventListener('click', () => relancer(b.dataset.relance))
+    );
   }
 
   function vignette(v) {
-    const label = v.label || v.scene;
+    // Deux essais de « Brouillard » portent le même nom : sans le numéro,
+    // l'agent ne sait pas laquelle des deux vignettes il regarde.
+    const label = (v.label || v.scene) + (v.version > 1 ? ` v${v.version}` : '');
+
+    // ↻ relance UNE ambiance. Sans objet sur la photo d'origine, et sans
+    // recours sur une demande libre dont le texte n'est plus à l'écran.
+    const relance =
+      v.scene && v.scene !== 'origine' && v.scene !== 'libre'
+        ? `<button type="button" class="c-relance" data-relance="${echapper(v.scene)}"
+                   title="Un autre essai de cette ambiance — 1 crédit"
+                   onclick="event.stopPropagation()">↻</button>`
+        : '';
+
     if (v.statut === 'ready') {
       return `<figure class="c-vignette prete" data-url="${v.url}" data-label="${echapper(label)}">
         <img src="${v.url}" alt="${echapper(label)}" loading="lazy">
-        <figcaption><b>${echapper(label)}</b><a href="${v.url}" download onclick="event.stopPropagation()">↓</a></figcaption>
+        <figcaption><b>${echapper(label)}</b>
+          <span class="c-actions">${relance}<a href="${v.url}" download onclick="event.stopPropagation()">↓</a></span>
+        </figcaption>
       </figure>`;
     }
     if (v.statut === 'failed') {
       return `<figure class="c-vignette echec">
         <div class="c-etat"><b>Échec</b>${echapper((v.erreur || '').slice(0, 90))}</div>
-        <figcaption><b>${echapper(label)}</b></figcaption>
+        <figcaption><b>${echapper(label)}</b><span class="c-actions">${relance}</span></figcaption>
       </figure>`;
     }
     const enCours = v.statut === 'processing';

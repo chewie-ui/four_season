@@ -60,7 +60,7 @@ export async function lireBien(agencyId, publicId) {
   let variantes = [];
   if (ids.length) {
     variantes = await query(
-      `SELECT v.public_id, v.scene_id, v.status, v.storage_key, v.error_message,
+      `SELECT v.public_id, v.scene_id, v.version, v.status, v.storage_key, v.error_message,
               v.latency_ms, v.source_image_id, v.created_at
          FROM variants v
         WHERE v.source_image_id IN (${ids.map(() => '?').join(',')})
@@ -93,6 +93,7 @@ export async function lireBien(agencyId, publicId) {
     variantes: variantes.map((v) => ({
       jeton: v.public_id,
       scene: v.scene_id,
+      version: Number(v.version) || 1,
       label: sceneById[v.scene_id]?.label || (v.scene_id === 'libre' ? 'Demande libre' : v.scene_id),
       statut: v.status,
       url: v.status === 'ready' ? urlPublique(v.storage_key) : null,
@@ -133,6 +134,9 @@ export function extraitIntegration(bien, clePublique = 'pk_live_votre_cle') {
   const pretes = bien.variantes.filter((v) => v.statut === 'ready' && v.scene !== 'libre');
   const base = bien.sources[0]?.url || '';
 
+  // Une ambiance peut avoir plusieurs versions. Les variantes arrivent triées
+  // par id croissant : la dernière écrase les précédentes, donc le code
+  // d'intégration embarque toujours l'essai le plus récent.
   const variantes = Object.fromEntries(pretes.map((v) => [v.scene, v.url]));
   const json = JSON.stringify(variantes);
 

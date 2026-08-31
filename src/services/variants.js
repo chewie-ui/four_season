@@ -43,7 +43,10 @@ const urlPublique = (storageKey) =>
  * @returns {Promise<{status:'ready', url:string}
  *                 | {status:'queued'|'processing', jeton:string}>}
  */
-export async function obtenirOuCreer({ agencyId, sourceImageId, sceneId, consigne = '', priorite = 5, lieu = null, mois = null }) {
+export async function obtenirOuCreer({
+  agencyId, sourceImageId, sceneId, consigne = '', priorite = 5,
+  lieu = null, mois = null, forcer = false,
+}) {
   const scene = sceneById[sceneId];
   const estLibre = sceneId === 'libre';
   if (!scene && !estLibre) throw new ErreurVariante(`Ambiance inconnue : ${sceneId}`, 404);
@@ -54,12 +57,21 @@ export async function obtenirOuCreer({ agencyId, sourceImageId, sceneId, consign
   const prompt = construire(sceneId, { lieu, mois, consigne });
   const promptHash = hachePrompt(prompt);
 
+  // `forcer` = l'agent veut explicitement un autre essai. On saute le cache
+  // et on crée une version suivante, qu'il pourra comparer à la précédente.
+  // Le cache reste intact pour les visiteurs, qui n'ont jamais ce drapeau.
+  if (forcer) {
+    await verifierSolde(agencyId);
+    return creerVersion({ agencyId, sourceImageId, sceneId, prompt, promptHash, priorite });
+  }
+
   const existantes = await query(
     `SELECT v.id, v.public_id, v.status, v.storage_key, j.id AS job_id
        FROM variants v
        LEFT JOIN generation_jobs j
               ON j.variant_id = v.id AND j.status IN ('queued', 'running')
       WHERE v.source_image_id = :src AND v.scene_id = :scene AND v.prompt_hash = :hash
+      ORDER BY v.version DESC
       LIMIT 1`,
     { src: sourceImageId, scene: sceneId, hash: promptHash }
   );
@@ -88,31 +100,56 @@ export async function obtenirOuCreer({ agencyId, sourceImageId, sceneId, consign
   }
 
   await verifierSolde(agencyId);
+  return creerVersion({ agencyId, sourceImageId, sceneId, prompt, promptHash, priorite });
+}
 
+/**
+ * Insère une nouvelle variante et son job, en prenant le numéro de version
+ * suivant pour ce couple (photo, ambiance).
+ *
+ * La numérotation est calculée dans la transaction : deux appels simultanés
+ * viseraient le même numéro, mais la contrainte unique refuse le doublon —
+ * on retente alors une fois, ce qui suffit à un usage humain.
+ */
+async function creerVersion({ agencyId, sourceImageId, sceneId, prompt, promptHash, priorite }, essai = 0) {
   const publicId = nanoid(21);
 
-  return transaction(async (conn) => {
-    const [res] = await conn.execute(
-      `INSERT INTO variants (source_image_id, agency_id, public_id, scene_id, prompt_hash, prompt, status)
-       VALUES (:src, :agency, :public_id, :scene, :hash, :prompt, 'pending')`,
-      {
-        src: sourceImageId,
-        agency: agencyId,
-        public_id: publicId,
-        scene: sceneId,
-        hash: promptHash,
-        prompt,
-      }
-    );
-    const variantId = res.insertId;
+  try {
+    return await transaction(async (conn) => {
+      const [[max]] = await conn.execute(
+        `SELECT COALESCE(MAX(version), 0) AS n FROM variants
+          WHERE source_image_id = :src AND scene_id = :scene`,
+        { src: sourceImageId, scene: sceneId }
+      );
+      const version = Number(max.n) + 1;
 
-    await conn.execute(
-      `INSERT INTO generation_jobs (variant_id, agency_id, priority) VALUES (:v, :a, :p)`,
-      { v: variantId, a: agencyId, p: priorite }
-    );
+      const [res] = await conn.execute(
+        `INSERT INTO variants (source_image_id, agency_id, public_id, scene_id, version, prompt_hash, prompt, status)
+         VALUES (:src, :agency, :public_id, :scene, :version, :hash, :prompt, 'pending')`,
+        {
+          src: sourceImageId,
+          agency: agencyId,
+          public_id: publicId,
+          scene: sceneId,
+          version,
+          hash: promptHash,
+          prompt,
+        }
+      );
 
-    return { status: 'queued', jeton: publicId };
-  });
+      await conn.execute(
+        `INSERT INTO generation_jobs (variant_id, agency_id, priority) VALUES (:v, :a, :p)`,
+        { v: res.insertId, a: agencyId, p: priorite }
+      );
+
+      return { status: 'queued', jeton: publicId, version };
+    });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY' && essai === 0) {
+      return creerVersion({ agencyId, sourceImageId, sceneId, prompt, promptHash, priorite }, 1);
+    }
+    throw err;
+  }
 }
 
 async function mettreEnFile(variantId, agencyId, priorite) {
